@@ -56,14 +56,14 @@ with open(exp_path + "/benchmarks.json") as fp:
         output_file = open(launch_path + "cluster_" + str(cluster_count) + ".sh", "w")
         if(suite == "dacapo"):
             if(filter_status == "yes"):
-                output_file.write(f'{library_extra_papi} {java_path} {gc} -XX:+ExtendedDTraceProbes -Dvpc.library.path={library_path} -Dvpc.output.directory={exp_path}/{cluster_count}_{benchmark} -Dvpc.baseline.path={baseline_path} -Dvpc.hpc.names={hpcs} -cp {dacapo_path} Harness {benchmark} -s {size} -no-validation --iterations {iters} --window {window} --variance {variance} -c edu.binghamton.vpc.{callback} &\n')
+                output_file.write(f'{library_extra_papi} {java_path} {gc} -XX:+ExtendedDTraceProbes -Dvpc.library.path={library_path} -Dvpc.output.directory={exp_path}/{cluster_count}_{benchmark} -Dvpc.baseline.path={baseline_path} -Dvpc.hpc.names={hpcs} -cp {dacapo_path} Harness {benchmark} -s {size} -no-validation --iterations {iters} --window {window} --variance {variance} -c vesta.{callback} &\n')
             else:
-                output_file.write(f'{library_extra_papi} {java_path} {gc} -XX:+ExtendedDTraceProbes -Dvpc.library.path={library_path} -Dvpc.output.directory={exp_path}/{cluster_count}_{benchmark} -Dvpc.hpc.names={hpcs} -cp {dacapo_path} Harness {benchmark} -s {size} -no-validation --iterations {iters} -c edu.binghamton.vpc.{callback} &\n')
+                output_file.write(f'{library_extra_papi} {java_path} {gc} -XX:+ExtendedDTraceProbes -Dvpc.library.path={library_path} -Dvpc.output.directory={exp_path}/{cluster_count}_{benchmark} -Dvpc.hpc.names={hpcs} -cp {dacapo_path} Harness {benchmark} -s {size} -no-validation --iterations {iters} -c vesta.{callback} &\n')
         else:
             if(filter_status == "yes"):
-                output_file.write(f'{library_extra_papi} {java_path} {gc} -XX:+ExtendedDTraceProbes -Dvpc.library.path={library_path} -Dvpc.output.directory={exp_path}/{cluster_count}_{benchmark} -Dvpc.baseline.path={baseline_path} -Dvpc.renaissance.args={iters},{window},{variance} -Dvpc.hpc.names={hpcs} -cp {renaissance_path} -jar {renaissance_jar} --plugin ../vpc-jar-scratch/vpc.jar!edu.binghamton.vpc.{callback} --policy ../vpc-jar-scratch/vpc.jar!edu.binghamton.vpc.{callback} {benchmark} &\n')
+                output_file.write(f'{library_extra_papi} {java_path} {gc} -XX:+ExtendedDTraceProbes -Dvpc.library.path={library_path} -Dvpc.output.directory={exp_path}/{cluster_count}_{benchmark} -Dvpc.baseline.path={baseline_path} -Dvpc.renaissance.args={iters},{window},{variance} -Dvpc.hpc.names={hpcs} -cp {renaissance_path} -jar {renaissance_jar} --plugin ../vpc-jar-scratch/vpc.jar!vesta.{callback} --policy ../vpc-jar-scratch/vpc.jar!vesta.{callback} {benchmark} &\n')
             else:
-                output_file.write(f'{library_extra_papi} {java_path} {gc} -XX:+ExtendedDTraceProbes -Dvpc.library.path={library_path} -Dvpc.output.directory={exp_path}/{cluster_count}_{benchmark} -Dvpc.hpc.names={hpcs} -cp {renaissance_path} -jar {renaissance_jar} -r {iters} --plugin ../vpc-jar-scratch/vpc.jar!edu.binghamton.vpc.{callback} {benchmark} &\n')
+                output_file.write(f'{library_extra_papi} {java_path} {gc} -XX:+ExtendedDTraceProbes -Dvpc.library.path={library_path} -Dvpc.output.directory={exp_path}/{cluster_count}_{benchmark} -Dvpc.hpc.names={hpcs} -cp {renaissance_path} -jar {renaissance_jar} -r {iters} --plugin ../vpc-jar-scratch/vpc.jar!vesta.{callback} {benchmark} &\n')
         if probes != "none" and 0:
                 output_file.write(f"python3 {script_path}java_multi_probe.py --pid $! --probes={probes} --output_directory={exp_path}/{cluster_count}_{benchmark} \n")
         else:

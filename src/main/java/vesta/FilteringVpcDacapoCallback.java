@@ -1,4 +1,4 @@
-package edu.binghamton.vpc;
+package vesta;
 
 import org.dacapo.harness.Callback;
 import org.dacapo.harness.CommandLineArgs;

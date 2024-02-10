@@ -14,22 +14,22 @@ mkdir -p "${CURRENT_DIR}"/data/dacapo
 DATA_DIR="${CURRENT_DIR}"/data/dacapo/reference
 mkdir -p "${DATA_DIR}"
 java -Dvpc.library.path="${CURRENT_DIR}"/bin -Dvpc.output.directory="${DATA_DIR}" \
--cp lib/dacapo.jar:vpc.jar Harness "${BENCHMARK}" -n "${ITERATIONS}" -s "${SIZE}" -c edu.binghamton.vpc.VpcDacapoCallback
+-cp lib/dacapo.jar:vpc.jar Harness "${BENCHMARK}" -n "${ITERATIONS}" -s "${SIZE}" -c vesta.VpcDacapoCallback
 
 REF_DIR="${DATA_DIR}"
 DATA_DIR="${CURRENT_DIR}"/data/dacapo/filtered
 mkdir -p "${DATA_DIR}"
 java -Dvpc.library.path="${CURRENT_DIR}"/bin -Dvpc.output.directory="${DATA_DIR}" -Dvpc.baseline.path="${REF_DIR}" \
--cp lib/dacapo.jar:vpc.jar Harness "${BENCHMARK}" -n "${ITERATIONS}" -s "${SIZE}" --window "${WINDOW}" --variance "${VARIANCE}" -c edu.binghamton.vpc.FilteringVpcDacapoCallback
+-cp lib/dacapo.jar:vpc.jar Harness "${BENCHMARK}" -n "${ITERATIONS}" -s "${SIZE}" --window "${WINDOW}" --variance "${VARIANCE}" -c vesta.FilteringVpcDacapoCallback
 
 # TODO(timur): this is a hard path; we should direct it to the third_party built version
 # TRACEABLE_JAVA=/home/jraskin3/VPC/open-jdk/build/linux-x86_64-server-fastdebug/jdk/bin/java
 # $TRACEABLE_JAVA -Dvpc.library.path="${CURRENT_DIR}"/bin -Dvpc.output.directory="${CURRENT_DIR}" \
-#   -cp lib/dacapo.jar:vpc.jar Harness sunflow -n 2 -c edu.binghamton.vpc.VpcDacapoCallback &
+#   -cp lib/dacapo.jar:vpc.jar Harness sunflow -n 2 -c vesta.VpcDacapoCallback &
 # python3 java_multi_probe.py --pid $! --probes='gc__begin,gc__end' --output_directory="${CURRENT_DIR}"
 
 # java -Dvpc.library.path="${CURRENT_DIR}"/bin -Dvpc.output.directory="${CURRENT_DIR}" \
-#   -cp lib/renaissance-gpl-0.11.0.jar:vpc.jar -jar lib/renaissance-gpl-0.11.0.jar --plugin vpc.jar!edu.binghamton.vpc.VpcRenaissancePlugin -r 2 scrabble #&
+#   -cp lib/renaissance-gpl-0.11.0.jar:vpc.jar -jar lib/renaissance-gpl-0.11.0.jar --plugin vpc.jar!vesta.VpcRenaissancePlugin -r 2 scrabble #&
 # python3 java_multi_probe.py --pid $! --probes='gc__begin,gc__end' --output_directory="${CURRENT_DIR}"
 
 mkdir -p "${CURRENT_DIR}"/data/renaissance
@@ -38,7 +38,7 @@ DATA_DIR="${CURRENT_DIR}"/data/renaissance/reference
 mkdir -p "${DATA_DIR}"
 java -Dvpc.library.path="${CURRENT_DIR}"/bin -Dvpc.output.directory="${CURRENT_DIR}"/data/renaissance/reference  -Dvpc.baseline.path="${REF_DIR}" \
   -cp lib/renaissance-gpl-0.11.0.jar:vpc.jar -jar lib/renaissance-gpl-0.11.0.jar \
-  --plugin vpc.jar!edu.binghamton.vpc.VpcRenaissancePlugin \
+  --plugin vpc.jar!vesta.VpcRenaissancePlugin \
   -r "${ITERATIONS}" \
   scrabble #&
 
@@ -48,6 +48,6 @@ mkdir -p "${DATA_DIR}"
 java -Dvpc.library.path="${CURRENT_DIR}"/bin -Dvpc.output.directory="${CURRENT_DIR}"/data/renaissance/filtered  -Dvpc.baseline.path="${REF_DIR}" \
   -Dvpc.renaissance.args="${ITERATIONS},${WINDOW},${VARIANCE}" \
   -cp lib/renaissance-gpl-0.11.0.jar:vpc.jar -jar lib/renaissance-gpl-0.11.0.jar \
-  --plugin vpc.jar!edu.binghamton.vpc.FilteringVpcRenaissancePlugin \
-  --policy vpc.jar!edu.binghamton.vpc.FilteringVpcRenaissancePlugin \
+  --plugin vpc.jar!vesta.FilteringVpcRenaissancePlugin \
+  --policy vpc.jar!vesta.FilteringVpcRenaissancePlugin \
   scrabble #&

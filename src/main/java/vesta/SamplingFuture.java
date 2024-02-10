@@ -1,4 +1,4 @@
-package edu.binghamton.vpc;
+package vesta;
 
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
 import static java.util.stream.Collectors.toList;

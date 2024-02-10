@@ -1,4 +1,4 @@
-package edu.binghamton.vpc;
+package vesta;
 
 import org.renaissance.Plugin;
 

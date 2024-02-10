@@ -1,4 +1,4 @@
-package edu.binghamton.vpc;
+package vesta;
 
 /** Class that provides a singleton interface to c's monotonic timestamp. */
 public final class MonotonicTimestamp {

@@ -41,8 +41,8 @@ native: libRapl.so libMonotonic.so
 	@echo 'built native libraries'
 
 smoke_test: jar libRapl.so libMonotonic.so
-	java -cp $(JAR) edu.binghamton.vpc.MonotonicTimestamp $(TARGET)/libMonotonic.so
-	java -cp $(JAR) edu.binghamton.vpc.Rapl $(TARGET)/libRapl.so
+	java -cp $(JAR) vesta.MonotonicTimestamp $(TARGET)/libMonotonic.so
+	java -cp $(JAR) vesta.Rapl $(TARGET)/libRapl.so
 	@echo 'all targets successfully built!'
 
 clean:
