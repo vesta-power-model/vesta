@@ -12,6 +12,8 @@ Any version of `java` should be sufficient to build the source.
 
 Then set up these:
 
+[`msr`] is required to read the RAPL for energy sampling. For an Intel-Linux system, you will probably need to run `sudo modprobe msr` to enable it.
+
 [`bpf`](https://docs.kernel.org/bpf) and [`bcc`](https://github.com/iovisor/bcc) to do `UDST` instrumentation. You can consult https://github.com/iovisor/bcc/blob/master/INSTALL.md if you are having trouble getting it to work.
 
 A version of `java` with the [`DTrace Probes`](https://docs.oracle.com/javase/8/docs/technotes/guides/vm/dtrace.html) enabled is needed to expose the `UDSTs`. You will likely have to re-compile from [source](https://github.com/openjdk/jdk/blob/master/doc/building.md) with the `--enable-dtrace` flag set. Ideally you will only need to run `bash configure --enable-dtrace`. You should be able to do this with any version; our experiments use `Java 19`.
