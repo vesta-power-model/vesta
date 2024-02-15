@@ -1,10 +1,7 @@
-# !/usr/bin/python
-
 import argparse
 import os
-
 from bcc import BPF, USDT
-
+PAGE_COUNT = 2048
 BPF_HEADER = """
 #include <uapi/linux/ptrace.h>
 #include <linux/types.h>
@@ -13,10 +10,12 @@ BPF_ARRAY(counts, u64, 400);
 struct data_t {
     u32 pid;
     u64 ts;
+    char probe[100];
     char comm[100];
 };
 
 BPF_PERF_OUTPUT(vm_shutdown);
+BPF_PERF_OUTPUT(events);
 
 int notify_shutdown(void *ctx) {
      struct data_t data = {};
@@ -29,14 +28,15 @@ int notify_shutdown(void *ctx) {
 """
 
 BPF_PROBE_HOOK = """
-BPF_PERF_OUTPUT(%s);
 
 int notify_%s(void *ctx) {
     struct data_t data = {};
     data.pid = bpf_get_current_pid_tgid();
     data.ts = bpf_ktime_get_ns();
+    strcpy(data.probe, "%s");
     bpf_get_current_comm(&data.comm, sizeof(data.comm));
-    %s.perf_submit(ctx, &data, sizeof(data));
+    events.perf_submit(ctx, &data, sizeof(data));
+    //bpf_trace_printk("hit probe %s\\n");
     return 0;
 }
 """
@@ -51,16 +51,21 @@ def generate_probe_tracing_program(probes):
 
 
 def shutdown_hook(output_path, cpu, data, size):
-    with open(os.path.join(output_path, 'probes.csv'), 'w') as fp:
-        fp.write('\n'.join([DATA_HEADER] + PROBE_DATA) + '\n')
+    with open(os.path.join(output_path, 'probes.csv'), 'a') as fp_hook:
+        fp_hook.write('\n'.join([""] + PROBE_DATA) + '\n')
+        # fp.write('\n'.join([DATA_HEADER] + PROBE_DATA) + '\n')
 
     global IS_RUNNING
     IS_RUNNING = False
 
 
-def tracing_hook(bpf, probe, cpu, data, size):
-    event = bpf[probe].event(data)
-    PROBE_DATA.append('%s,%d,%d' % (probe, event.ts, BPF.monotonic_time()))
+def tracing_hook(bpf, cpu, data, size):
+    event = bpf['events'].event(data)
+    PROBE_DATA.append('%s,%d,%d' % (
+        event.probe.decode('utf-8'),
+        event.ts,
+        BPF.monotonic_time()
+    ))
 
 
 def add_tracing_hook(bpf, probe):
@@ -71,7 +76,7 @@ def add_tracing_hook(bpf, probe):
             cpu,
             data,
             size
-        )
+        ), page_cnt=PAGE_COUNT
     )
 
 
@@ -101,22 +106,44 @@ def main():
 
     usdt = USDT(pid=args.pid)
     usdt.enable_probe(probe='vm__shutdown', fn_name='notify_shutdown')
-    for probe in probes:
-        usdt.enable_probe(probe=probe, fn_name='notify_%s' % probe)
+    system_probes = []
+    for i in range(0, len(probes)):
+        if ":" in probes[i]:
+            system_probes.append(probes[i])
+            probes[i] = probes[i].split(":")[1]
+        else:
+            usdt.enable_probe(probe=probes[i], fn_name='notify_%s' % probes[i])
 
-    code = generate_probe_tracing_program(args.probes.split(','))
+    code = generate_probe_tracing_program(probes)
+    # print(code)
     bpf = BPF(text=code, usdt_contexts=[usdt])
+    # bpf = BPF(text=code)
+    for sys_probe in system_probes:
+        bpf.attach_tracepoint(
+            tp=sys_probe, fn_name=f"notify_{sys_probe.split(':')[1]}")
     bpf['vm_shutdown'].open_perf_buffer(lambda cpu, data, size: shutdown_hook(
         args.output_directory,
         cpu,
         data,
         size
-    ))
-    for probe in probes:
-        add_tracing_hook(bpf, probe)
-
+    ), page_cnt=PAGE_COUNT)
+    bpf['events'].open_perf_buffer(lambda cpu, data, size: tracing_hook(
+        bpf,
+        cpu,
+        data,
+        size
+    ), page_cnt=PAGE_COUNT)
+    # the commented sections were added to help with piecemeal writing (not necessary)
+    fp = open(os.path.join(args.output_directory, 'probes.csv'), 'w')
+    fp.write(f"{DATA_HEADER} \n")
+    global PROBE_DATA
     while IS_RUNNING:
         bpf.perf_buffer_poll(timeout=1)
+        if len(PROBE_DATA) > 1000000:
+            temp = PROBE_DATA
+            PROBE_DATA = []
+            fp.write('\n'.join([""] + temp) + '\n')
+    fp.close()
 
 
 if __name__ == '__main__':

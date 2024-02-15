@@ -27,7 +27,7 @@ public final class SampleCollector {
   public static double getBaselineRuntime(int warmUp) {
     // TODO: this is a little hacky; we should see if there's a better way to access the
     // baseline
-    String baselinePath = String.join("/", System.getProperty("vpc.baseline.path"));
+    String baselinePath = String.join("/", System.getProperty("vesta.baseline.path"));
     if (baselinePath == null) {
       return 0;
     }
@@ -117,7 +117,7 @@ public final class SampleCollector {
               new BufferedWriter(
                   new FileWriter(
                       String.join(
-                          "/", System.getProperty("vpc.output.directory"), "summary.csv"))));
+                          "/", System.getProperty("vesta.output.directory"), "summary.csv"))));
       writer.println("iteration,timestamp,duration,energy");
       for (Summary s : summary) {
         writer.println(
@@ -125,7 +125,7 @@ public final class SampleCollector {
       }
       writer.close();
     } catch (IOException e) {
-      System.out.println("Unable to write VPC summary data!");
+      System.out.println("Unable to write Vesta summary data!");
       e.printStackTrace();
     }
 
@@ -134,7 +134,7 @@ public final class SampleCollector {
           new PrintWriter(
               new BufferedWriter(
                   new FileWriter(
-                      String.join("/", System.getProperty("vpc.output.directory"), "energy.csv"))));
+                      String.join("/", System.getProperty("vesta.output.directory"), "energy.csv"))));
       int componentCount = samples.get(0).energy[0].length * Rapl.getInstance().getSocketCount();
       writer.println(
           String.join(
@@ -153,7 +153,7 @@ public final class SampleCollector {
       }
       writer.close();
     } catch (IOException e) {
-      System.out.println("Unable to write VPC energy data!");
+      System.out.println("Unable to write Vesta energy data!");
       e.printStackTrace();
     }
   }
@@ -170,11 +170,11 @@ public final class SampleCollector {
       new File(
               String.join(
                   "/",
-                  System.getProperty("vpc.output.directory"),
+                  System.getProperty("vesta.output.directory"),
                   accepted ? "accepted" : "rejected"))
           .createNewFile();
     } catch (IOException e) {
-      System.out.println("Unable to write VPC status!");
+      System.out.println("Unable to write Vesta status!");
       e.printStackTrace();
     }
   }
@@ -235,12 +235,12 @@ public final class SampleCollector {
   // helpers methods that grab/handle data
   private static long getMonotonicTimestamp() {
     return MonotonicTimestamp.getInstance(
-            String.join("/", System.getProperty("vpc.library.path"), "libMonotonic.so"))
+            String.join("/", System.getProperty("vesta.library.path"), "libMonotonic.so"))
         .getMonotonicTimestamp();
   }
 
   private static double[][] getEnergy() {
-    return Rapl.getInstance(String.join("/", System.getProperty("vpc.library.path"), "libRapl.so"))
+    return Rapl.getInstance(String.join("/", System.getProperty("vesta.library.path"), "libRapl.so"))
         .getEnergyStats();
   }
 

@@ -18,7 +18,7 @@ def maybe_apply_wrap_around(value):
 
 def align_probes(path, normalize_timestamps_fn=None, warm_up=WARM_UP):
     # expects header: iteration,timestamp,energy_component_0,energy_component_1
-    # consult edu.binghamton.vpc.SampleCollector for more information
+    # consult vesta.SampleCollector for more information
     energy = pd.read_csv(os.path.join(path, 'energy.csv'))
     energy = energy[energy.iteration > WARM_UP]
     if normalize_timestamps_fn is None:

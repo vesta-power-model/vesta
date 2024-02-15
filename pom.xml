@@ -4,12 +4,12 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>vpc</groupId>
-  <artifactId>vpc</artifactId>
+  <groupId>vesta</groupId>
+  <artifactId>vesta</artifactId>
   <version>0.1.0</version>
   <packaging>jar</packaging>
 
-  <name>vpc</name>
+  <name>vesta</name>
 
   <properties>
       <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -29,35 +29,22 @@
         <groupId>org.renaissance</groupId>
         <artifactId>renaissance</artifactId>
         <version>0.14.1</version>
-        <!-- <scope>system</scope>
-        <systemPath>${basedir}/lib/renaissance-gpl-0.14.1.jar</systemPath> -->
     </dependency>
     <dependency>
         <groupId>org.dacapo</groupId>
         <artifactId>dacapo</artifactId>
         <version>1.0.0</version>
-        <!-- <scope>system</scope>
-        <systemPath>${basedir}/lib/dacapo.jar</systemPath> -->
     </dependency>
-    <!-- <dependency>
-        <groupId>papi</groupId>
-        <artifactId>papi</artifactId>
-        <version>1.0.0</version> -->
-        <!-- <scope>system</scope>
-        <systemPath>${basedir}/lib/papi.jar</systemPath> -->
-    <!-- </dependency> -->
     <!-- jmh deps -->
     <dependency>
         <groupId>org.openjdk.jmh</groupId>
         <artifactId>jmh-core</artifactId>
         <version>1.35</version>
-        <!-- <scope>test</scope> -->
     </dependency>
     <dependency>
         <groupId>org.openjdk.jmh</groupId>
         <artifactId>jmh-generator-annprocess</artifactId>
         <version>1.35</version>
-        <!-- <scope>test</scope> -->
     </dependency>
     <dependency>
         <groupId>com.github.biboudis</groupId>

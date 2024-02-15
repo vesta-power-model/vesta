@@ -6,7 +6,7 @@
 extern "C" {
 #endif
 
-JNIEXPORT jlong JNICALL Java_edu_binghamton_vpc_MonotonicTimestamp_getMonotonicTimestamp
+JNIEXPORT jlong JNICALL Java_vesta_MonotonicTimestamp_getMonotonicTimestamp
   (JNIEnv *env, jclass cls) {
 	  struct timespec ts;
 	  clock_gettime(CLOCK_MONOTONIC,&ts);
