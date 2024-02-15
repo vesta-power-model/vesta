@@ -10,7 +10,7 @@ sudo apt-get install openjdk19 maven make python
 
 Any version of `java` should be sufficient to build the source.
 
-Then set up this:
+Then set up these:
 
 [`bpf`](https://docs.kernel.org/bpf) and [`bcc`](https://github.com/iovisor/bcc) to do `UDST` instrumentation. You can consult https://github.com/iovisor/bcc/blob/master/INSTALL.md if you are having trouble getting it to work.
 
@@ -20,11 +20,11 @@ A version of `java` with the [`DTrace Probes`](https://docs.oracle.com/javase/8/
 
 1. run `bash setup_benchmarks.sh` to get the dependency benchmarks.
 
-2. run `mvn install` to build a fat vesta `jar`.
+2. run `mvn clean install` to build a fat vesta `jar`.
 
 3. run `make native` to build the native libraries used for runtime sampling.
 
-4. run `pip install . -r requirements.txt` to setup `BPF` sampling and modeling.
+4. run `pip install -r requirements.txt` to setup libraries for `BPF` sampling and modeling.
 
 ## Experiment Reproduction
 

@@ -5,9 +5,7 @@ import org.dacapo.harness.CommandLineArgs;
 
 /** {@link Callback} for dacapo that wraps usage of the {@link SampleCollector}. */
 public class VestaDacapoCallback extends Callback {
-  // private final SampleCollector collector = new SampleCollector();
-  // private final SampleCollectorPapi papiCollector = new SampleCollectorPapi();
-  private final PowercapCollector powercapCollector = new PowercapCollector();
+  private final SampleCollector collector = new SampleCollector();
     
   public VestaDacapoCallback(CommandLineArgs args) {
     super(args);
@@ -16,17 +14,13 @@ public class VestaDacapoCallback extends Callback {
   @Override
   public void start(String benchmark) {
     super.start(benchmark);
-    // collector.start();
-    // papiCollector.start();
-    powercapCollector.start();
+    collector.start();
   }
 
   @Override
   public void stop(long w) {
     super.stop(w);
-    // collector.stop();
-    // papiCollector.stop();
-    powercapCollector.stop();
+    collector.stop();
   }
 
   @Override
@@ -34,9 +28,7 @@ public class VestaDacapoCallback extends Callback {
     // if we have run every iteration, dump the data and terminate
     if (!super.runAgain()) {
       System.out.println("dumping data");
-      // collector.dump();
-      // papiCollector.dump();
-      powercapCollector.dump();
+      collector.dump();
       return false;
     } else {
       return true;
