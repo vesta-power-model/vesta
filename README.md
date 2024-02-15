@@ -12,7 +12,7 @@ Any version of `java` should be sufficient to build the source.
 
 Then set up these:
 
-[`msr`] is required to read the RAPL for energy sampling. For an Intel-Linux system, you will probably need to run `sudo modprobe msr` to enable it.
+`msr` is required to read the RAPL for energy sampling. For an Intel-Linux system, you will probably need to run `sudo modprobe msr` to enable it.
 
 [`bpf`](https://docs.kernel.org/bpf) and [`bcc`](https://github.com/iovisor/bcc) to do `UDST` instrumentation. You can consult https://github.com/iovisor/bcc/blob/master/INSTALL.md if you are having trouble getting it to work.
 
