@@ -3,6 +3,7 @@
 # Some things are still hard-coded for convenience, but should be changed later
 #       i.e. library_path, script_path, dacapo_path, renaissance_path, renaissance_jar, when calling the renaissance jar, & the references to the vesta jar
 import argparse
+import shutil
 import os
 import json
 
@@ -10,14 +11,17 @@ parser = argparse.ArgumentParser(
     description="Probes Parser", formatter_class=argparse.RawDescriptionHelpFormatter)
 parser.add_argument("-iters", "--iters", type=int, help="Number of iterations")
 parser.add_argument("-exp_path", "--exp_path", type=str,
-                    help="Path where benchmarks file is stored")
+                    help="Path where you want to generate the experiments")
 parser.add_argument("-java_path", "--java_path", type=str,
                     help="Path to specified java version", default="java")
+parser.add_argument("-benchmarks", "--benchmarks", type=str,
+                    help="Path to benchmarks file")
 parser.set_defaults(verbose=False)
 
 args = parser.parse_args()
 exp_path = args.exp_path
 java_path = args.java_path
+benchmarks = args.benchmarks
 iters = args.iters
 launch_path = exp_path + "/launch/"
 library_extra_papi = f"LD_LIBRARY_PATH={os.getcwd()}/bin/.:/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH"
@@ -41,7 +45,8 @@ def create_dir(str_dir):
 
 
 create_dir(launch_path)
-with open(exp_path + "/benchmarks.json") as fp:
+shutil.copyfile(benchmarks, os.path.join(exp_path, "benchmarks.json"))
+with open(benchmarks) as fp:
     # cluster_count and bench_count are used to enforce a naming convention for the experimental folders
     # <cluster #>_<bench #>_benchmark
     cluster_count = 0
