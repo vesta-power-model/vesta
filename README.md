@@ -29,6 +29,8 @@ sudo docker run -it --rm  --privileged \
     vesta
 ```
 
+If you are trying to reproduce the experiments from the github repo, you will need to get the benchmark jars before building the Docker image, which can be done with `bash setup_benchmarks.sh`.
+
 ## Running from Source
 
 You can also reproduce our experiments directly from this repository. Our experiments were run on the following system:
@@ -48,7 +50,7 @@ First you should install the following:
 apt-get install -y git wget openjdk-11-jdk make \
     gcc maven bpftrace bpfcc-tools libbpfcc libbpfcc-dev \
     python3 python3-pip
-pip3 install numpy pandas pytest numba
+pip3 install numpy pandas pytest numba xgboost scikit-learn
 ```
 
 1. run `bash setup_benchmarks.sh` to get the dependency benchmarks.
@@ -95,4 +97,15 @@ python3 scripts/alignment.py \
     data
 ```
 
-Modeling and evaluation is done through the code provided in `notebooks`.
+Modeling and evaluation can done through the two provided scripts:
+
+```bash
+python3 scripts/model_builder.py \
+    --out_path=data \
+    --name=vesta-artifact \
+    data/aligned.csv
+python3 scripts/inference.py \
+    --out_path=data/vesta-artifact_inference.pdf \
+    data/vesta-artifact.json \
+    data/vesta-artifact_test.csv
+```
