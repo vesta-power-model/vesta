@@ -7,12 +7,14 @@ import argparse
 parser = argparse.ArgumentParser(description="Inference Stage Parser", formatter_class=argparse.RawDescriptionHelpFormatter)
 parser.add_argument("model", help="Path to model created by model_builder.py")
 parser.add_argument("test_data", help="Path to aligned testing data for prediction")
+parser.add_argument("-o","--out_path", type=str,help="Path where the plot for the inference is stored", default="./")
+parser.add_argument("-t","--xgb_tree", type=str,help="The xgboost tree method to use.", default="hist")
 parser.set_defaults(verbose=False)
 args = parser.parse_args() 
 model_path = args.model
 test_data = args.test_data
 
-model = XGBRegressor(tree_method='gpu_hist', gpu_id=0)
+model = XGBRegressor(tree_method=args.xgb_tree, gpu_id=0)
 model.load_model(model_path)
 
 df_test = pd.read_csv(test_data)
@@ -57,7 +59,7 @@ import matplotlib.ticker as mtick
 fig = plt.gcf()
 fig, ax = plt.subplots(figsize=(10, 3))
 ax.bar(ratio_mean_df.index, ratio_mean_df["mean"]*100, yerr=ratio_mean_df["std"]*100, capsize=2, color="tab:purple", edgecolor="black")
-print(f"\nAvg Error = {(ratio_mean_df.mean()[0] * 100):.2f}%\nMedian Error = {(ratio_mean_df.median()[0] * 100):.2f}%")
+print(f"\nAvg Error = {(ratio_mean_df['mean'].mean() * 100):.2f}%\nMedian Error = {(ratio_mean_df['mean'].median() * 100):.2f}%")
 plt.ylim(0,10)
 plt.xlabel("Benchmark")
 plt.ylabel("Percent Error")
@@ -66,6 +68,5 @@ yticks = mtick.FormatStrFormatter(fmt)
 ax.yaxis.set_major_formatter(yticks)
 ax.set_xlim(0.5, len(ratio_mean_df))
 plt.xticks(rotation=55, ha='right')
-#plt.savefig(f"/home/jraskin3/vesta_figs/prediction-error-NN-25-12-1-faithful-1s-alignment.pdf", format="pdf", bbox_inches="tight")
-plt.show()
-plt.clf()
+plt.savefig(args.out_path, format="pdf", bbox_inches="tight")
+plt.close()
