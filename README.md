@@ -112,6 +112,9 @@ python3 scripts/model_builder.py \
     --out_path=data \
     --name=vesta-artifact \
     data/aligned.csv
+```
+
+```bash
 python3 scripts/inference.py \
     --out_path=data/vesta-artifact_inference.pdf \
     data/vesta-artifact.json \
