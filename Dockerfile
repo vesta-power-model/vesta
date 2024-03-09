@@ -15,5 +15,5 @@ COPY dtrace-jdk.tar.gz vesta/.
 RUN cd vesta && tar -xzvf dtrace-jdk.tar.gz
 RUN apt-get install -y bpftrace bpfcc-tools libbpfcc libbpfcc-dev
 RUN apt-get install -y python3 python3-pip
-RUN cd vesta && pip3 install numpy pandas pytest numba xgboost sklearn
+RUN cd vesta && pip3 install numpy pandas pytest numba xgboost sklearn matplotlib
 
