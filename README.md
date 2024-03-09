@@ -12,9 +12,9 @@ In order to run the experiments (in a Docker image or otherwise), the system mus
 
 `msr` is required to read the RAPL for energy sampling. For an Intel-Linux system, you will probably need to run `sudo modprobe msr` to enable it.
 
-[`bpf`](https://docs.kernel.org/bpf) and [`bcc`](https://github.com/iovisor/bcc) is required for `UDST` instrumentation. Most of the time, you will only need to enable the kernel headers by adding [`CONFIG_IKHEADERS=y`](https://github.com/iovisor/bcc/blob/master/INSTALL.md#kernel-configuration) to your config. You can consult https://github.com/iovisor/bcc/blob/master/INSTALL.md if you are having trouble getting it to work.
+[`bpf`](https://docs.kernel.org/bpf) and [`bcc`](https://github.com/iovisor/bcc) are required for `UDST` instrumentation. Most of the time, you will only need to enable the kernel headers by adding [`CONFIG_IKHEADERS=y`](https://github.com/iovisor/bcc/blob/master/INSTALL.md#kernel-configuration) to your config. You can consult https://github.com/iovisor/bcc/blob/master/INSTALL.md if you are having trouble getting it to work.
 
-Finally, you will need a version of `java` with the [`DTrace Probes`](https://docs.oracle.com/javase/8/docs/technotes/guides/vm/dtrace.html) enabled is needed to expose the `UDSTs`. Our official repository contains a pre-built version of `openjdk-19` that was used to run our experiments. If you would like to use a different version or you are running this from github repository, you need to re-compile from [source](https://github.com/openjdk/jdk/blob/master/doc/building.md) with the `--enable-dtrace` flag set.
+Finally, you will need a version of `java` with [`DTrace Probes`](https://docs.oracle.com/javase/8/docs/technotes/guides/vm/dtrace.html) enabled is needed to expose the `UDSTs`. Our official repository contains a pre-built version of `openjdk-19` that was used to run our experiments. If you would like to use a different version or you are running this from the github repository, you need to re-compile from [source](https://github.com/openjdk/jdk/blob/master/doc/building.md) with the `--enable-dtrace` flag set.
 
 ## Running with Docker
 
