@@ -3,7 +3,15 @@
 VESTA is a power modeling system that uses *language runtime events* for prediction. Below is the abstract for the publication.
 
 ```
-Power modeling is an essential building block for computer systems in support of energy optimization, energy profiling, and energy-aware application development. We introduce `VESTA`, a novel approach to modeling the power consumption of applications with one key insight: \emph{language runtime} events are often correlated with a sustained level of power consumption. When compared with the established approach of power modeling based on hardware performance counters (HPCs), `VESTA` has the benefit of not requiring root privileges and enabling higher-levels of explainability, while achieving comparable or even higher precision. Through experiments performed on 37 real-world applications on the Java Virtual Machine (JVM), `VESTA` is capable of predicting energy consumption with a mean absolute percentage error of 1.56\% while incurring a minimal performance and energy overhead.
+Power modeling is an essential building block for computer systems in support of energy optimization,
+energy profiling, and energy-aware application development. We introduce `VESTA`, a novel approach
+to modeling the power consumption of applications with one key insight: *language runtime* events
+are often correlated with a sustained level of power consumption. When compared with the established
+approach of power modeling based on hardware performance counters (HPCs), `VESTA` has the benefit of not
+requiring root privileges and enabling higher-levels of explainability, while achieving comparable or
+even higher precision. Through experiments performed on 37 real-world applications on the
+Java Virtual Machine (JVM), `VESTA` is capable of predicting energy consumption with a mean absolute
+percentage error of 1.56\% while incurring a minimal performance and energy overhead.
 ```
 
 ## Setup
