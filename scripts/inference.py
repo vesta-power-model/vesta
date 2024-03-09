@@ -14,7 +14,7 @@ args = parser.parse_args()
 model_path = args.model
 test_data = args.test_data
 
-model = XGBRegressor(tree_method=args.xgb_tree, gpu_id=0)
+model = XGBRegressor(tree_method=args.xgb_tree)
 model.load_model(model_path)
 
 df_test = pd.read_csv(test_data)

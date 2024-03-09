@@ -28,7 +28,7 @@ ratios = {}
 for bench in benchmarks:
     ratios[bench] = []
     
-model = XGBRegressor(tree_method=args.xgb_tree, gpu_id=0)
+model = XGBRegressor(tree_method=args.xgb_tree)
 df_train, df_test = train_test_split(df, test_size=.5)
 events_df_train = df_train
 power_df_train = df_train["power"]
