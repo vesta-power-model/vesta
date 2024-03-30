@@ -8,8 +8,8 @@ public class VestaRenaissancePlugin
     implements Plugin.BeforeBenchmarkTearDownListener,
         Plugin.AfterOperationSetUpListener,
         Plugin.BeforeOperationTearDownListener {
-  private final SampleCollector collector = new SampleCollector();
-    
+  private final PowercapCollector collector = new PowercapCollector();
+
   @Override
   public void afterOperationSetUp(String benchmark, int opIndex, boolean isLastOp) {
     collector.start();
