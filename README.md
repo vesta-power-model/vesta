@@ -16,11 +16,63 @@ percentage error of 1.56\% while incurring a minimal performance and energy over
 
 ## Setup
 
-In order to run the experiments (in a Docker image or otherwise), the system must be Intel + Linux in order to be able to collect the data for the experiments.
+In order to run the experiments (in a Docker image or otherwise), the system must be Intel + Linux and you must have `sudo` access in order to collect the data for the experiments. These following steps must be done on your system even if you are running through the Docker image.
 
 `msr` is required to read the RAPL for energy sampling. For an Intel-Linux system, you will probably need to run `sudo modprobe msr` to enable it.
 
-[`bpf`](https://docs.kernel.org/bpf) and [`bcc`](https://github.com/iovisor/bcc) are required for `UDST` instrumentation. Most of the time, you will only need to enable the kernel headers by adding [`CONFIG_IKHEADERS=y`](https://github.com/iovisor/bcc/blob/master/INSTALL.md#kernel-configuration) to your config. You can consult https://github.com/iovisor/bcc/blob/master/INSTALL.md if you are having trouble getting it to work.
+[`bpf`](https://docs.kernel.org/bpf) and [`bcc`](https://github.com/iovisor/bcc) are required for `UDST` instrumentation. First you need to enable the kernel headers by updating your configuration, which can be found at either `/proc/config.gz` or `/boot/config-<kernel-version>`. You should ensure the following flags in the configuration are set to `y`:
+
+```
+CONFIG_BPF=y
+CONFIG_BPF_SYSCALL=y
+CONFIG_BPF_JIT=y
+CONFIG_HAVE_EBPF_JIT=y
+CONFIG_BPF_EVENTS=y
+CONFIG_IKHEADERS=y
+```
+
+Next, you will need to setup `bpf` and `bcc` for your distribution, which is listed in `bcc`'s [installation guide](https://github.com/iovisor/bcc/blob/master/INSTALL.md). For this process, you will need to install the kernel headers, `bpf`, and `bcc` which is frequently available through your package manager. The specific packages will differ and can be found in the installation guide, but we provide the instructions here for ease:
+
+```
+# debian
+echo deb http://cloudfront.debian.net/debian sid main >> /etc/apt/sources.list
+sudo apt-get install -y bpfcc-tools libbpfcc libbpfcc-dev linux-headers-$(uname -r)
+
+# ubuntu
+sudo apt-get install bpfcc-tools linux-headers-$(uname -r)
+
+# fedora 30 and higher
+sudo dnf install bcc
+
+# fedora 29 and lower
+sudo dnf config-manager --add-repo=http://alt.fedoraproject.org/pub/alt/rawhide-kernel-nodebug/fedora-rawhide-kernel-nodebug.repo
+sudo dnf update
+
+# arch linux
+pacman -S bcc bcc-tools python-bcc
+
+# gentoo
+emerge sys-kernel/gentoo-sources
+emerge dev-util/bcc
+
+# openSUSE
+sudo zypper ref
+sudo zypper in bcc-tools bcc-examples
+
+# RHEL
+yum install bcc-tools
+
+# amazon linux 1
+sudo yum update kernel
+sudo yum install bcc
+sudo reboot
+
+# amazon linux 2
+sudo amazon-linux-extras install BCC
+
+# alpine
+sudo apk add bcc-tools bcc-doc
+```
 
 Finally, you will need a version of `java` with [`DTrace Probes`](https://docs.oracle.com/javase/8/docs/technotes/guides/vm/dtrace.html) enabled is needed to expose the `UDSTs`. Our official repository contains a pre-built version of `openjdk-19` that was used to run our experiments. If you would like to use a different version or you are running this from the github repository, you need to re-compile from [source](https://github.com/openjdk/jdk/blob/master/doc/building.md) with the `--enable-dtrace` flag set.
 
@@ -44,7 +96,7 @@ If you are trying to reproduce the experiments from the github repo, you will ne
 You can also reproduce our experiments directly from this repository. Our experiments were run on the following system:
 
 ```
-dual socket Intel Xeon E5-3630 v4 2.20GHz
+Dual socket Intel Xeon E5-3630 v4 2.20GHz
 64GB DDR4 RAM
 Debian 11
 Linux kernel 5.17.0-3-amd64
@@ -60,6 +112,7 @@ apt-get install -y git wget openjdk-11-jdk make \
     python3 python3-pip
 pip3 install numpy pandas pytest numba xgboost scikit-learn
 ```
+If you are not on Debian. your system's package manager likely has similar targets.
 
 1. run `bash setup_benchmarks.sh` to get the dependency benchmarks.
 
