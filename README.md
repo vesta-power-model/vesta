@@ -18,7 +18,11 @@ percentage error of 1.56\% while incurring a minimal performance and energy over
 
 In order to run the experiments (in a Docker image or otherwise), the system must be Intel + Linux and you must have `sudo` access in order to collect the data for the experiments. These following steps must be done on your system even if you are running through the Docker image.
 
+### RAPL
+
 `msr` is required to read the RAPL for energy sampling. For an Intel-Linux system, you will probably need to run `sudo modprobe msr` to enable it.
+
+### bcc
 
 [`bpf`](https://docs.kernel.org/bpf) and [`bcc`](https://github.com/iovisor/bcc) are required for `UDST` instrumentation. First you need to enable the kernel headers by updating your configuration, which can be found at either `/proc/config.gz` or `/boot/config-<kernel-version>`. You should ensure the following flags in the configuration are set to `y`:
 
@@ -73,6 +77,8 @@ sudo amazon-linux-extras install BCC
 # alpine
 sudo apk add bcc-tools bcc-doc
 ```
+
+### Java with Dtrace
 
 Finally, you will need a version of `java` with [`DTrace Probes`](https://docs.oracle.com/javase/8/docs/technotes/guides/vm/dtrace.html) enabled is needed to expose the `UDSTs`. Our official repository contains a pre-built version of `openjdk-19` that was used to run our experiments. If you would like to use a different version or you are running this from the github repository, you need to re-compile from [source](https://github.com/openjdk/jdk/blob/master/doc/building.md) with the `--enable-dtrace` flag set.
 
