@@ -235,7 +235,7 @@ python3 /mnt/c/Users/atpov/Documents/projects/vesta/scripts/java_multi_probe.py 
     --probes="${PROBES}"
 ```
 
-This will produce a `probes.csv` file containing the probing information. The above list of probes were selected during `VESTA`'s evaluation. You may add or remove probes from this list; however, there are two caveats:
+This will produce a `probes.csv` file containing the probing information. The above list of probes were selected during `VESTA`'s evaluation. You may add or remove probes from this list by consulting the full list of Java's [DTrace Probes](https://docs.oracle.com/javase/8/docs/technotes/guides/vm/dtrace.html); make sure that any instace of a hyphen (`-`) will need to be replaced by two underscores (`__`). There are two additional caveats regarding modifying the sampled probes:
 
 1. As mentioned in the publication, unselected probes incurred significant overhead 
 2. Language runtime events (LREs) are represented through a pair of probes with the same prefix but ending with `__entry`/`__return` and `__begin`/`__end`. If a given probe does not have its pair, then it will be modeled individually as a counter.
