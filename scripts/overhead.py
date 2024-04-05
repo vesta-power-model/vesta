@@ -5,8 +5,11 @@ import os
 
 import numpy as np
 import pandas as pd
+import matplotlib as mpl
+from matplotlib.ticker import PercentFormatter
+import matplotlib.ticker as mtick
+import matplotlib.pyplot as plt
 
-# default values for the experiments run on jolteon
 WARM_UP = 5
 
 
@@ -119,15 +122,67 @@ def main():
     has_data = probing_summary.groupby(['probe', 'benchmark']).has_data.max()
     summary['has_data'] = has_data
 
-    #if not os.path.exists(args.output_directory):
-    #    os.mkdir(args.output_directory)
-    #summary.to_csv(os.path.join(args.output_directory, 'summary.csv'))
 
-    print('wrote overhead summary data to {}'.format(
-        os.path.join(args.output_directory, 'summary.csv')))
-    print(summary.groupby('probe')[['duration', 'energy', 'power']].mean().sort_values(
-        by='duration', ascending=False).head(50))
+    #print(summary.reset_index())
+    df = summary.reset_index().drop("probe", axis=1)
+    df = df.sort_values("benchmark")
+    print(df)
+    
+    #Wall Clock Overhead Graph
+    mpl.rcParams['axes.labelsize'] = "x-large"
+    mpl.rcParams['axes.titlesize'] = 'x-large'
+    mpl.rcParams['xtick.labelsize'] = 'x-large'
+    mpl.rcParams['ytick.labelsize'] = 'x-large'
+    N = len(df)
+
+    duration_bar = df["duration"]
+    duration_error = df["duration_err"]
+    ind = np.arange(N)
+
+    fig = plt.gcf()
+    fig, ax = plt.subplots(figsize=(10, 3))
+    ax.bar(ind, duration_bar, label='Duration', color="tab:red", edgecolor="black",yerr=duration_error, capsize=2)
+
+    plt.ylabel("Overhead Percentage")
+    plt.xlabel("Benchmark")
+    plt.xticks(rotation=55, ha='right')
+    ax.set_xlim(ind[0]-1, len(duration_bar))
+    fmt = '%.0f%%'
+    yticks = mtick.FormatStrFormatter(fmt)
+    ax.yaxis.set_major_formatter(yticks)
+
+    plt.xticks(ind, df["benchmark"])
+
+    plt.savefig(f"{args.output_directory}wall_clock_overhead.pdf", format="pdf", bbox_inches="tight")
 
 
+    #Energy Overhead Graph
+    mpl.rcParams['axes.labelsize'] = "x-large"
+    mpl.rcParams['axes.titlesize'] = 'x-large'
+    mpl.rcParams['xtick.labelsize'] = 'x-large'
+    mpl.rcParams['ytick.labelsize'] = 'x-large'
+
+    N = len(df)
+
+    power_bar = df["power"]
+    power_error = df["power_err"]
+    ind = np.arange(N)
+
+    fig = plt.gcf()
+    fig, ax = plt.subplots(figsize=(10, 3))
+    ax.bar(ind, power_bar, label='Energy', color="tab:green", edgecolor="black", yerr=power_error, capsize=2)
+
+    plt.ylabel("Overhead Percentage")
+    plt.xlabel("Benchmark")
+    plt.xticks(rotation=55, ha='right')
+    ax.set_xlim(ind[0]-1, len(power_bar))
+    fmt = '%.0f%%'
+    yticks = mtick.FormatStrFormatter(fmt)
+    ax.yaxis.set_major_formatter(yticks)
+
+    plt.xticks(ind, df["benchmark"])
+
+    plt.savefig(f"{args.output_directory}energy_overhead.pdf", format="pdf", bbox_inches="tight")
+    
 if __name__ == '__main__':
     main()
