@@ -5,7 +5,7 @@ final class MyFibonacci {
     if (n == 0 || n == 1) {
       return n;
     } else {
-      return fibonacci(n - 1) + fibonacci(n - 2);
+      return fib(n - 1) + fib(n - 2);
     }
   }
 
