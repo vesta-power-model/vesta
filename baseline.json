@@ -1,0 +1,386 @@
+[
+	{
+		"suite": "dacapo",
+		"benchmark": "avrora",
+		"size": "default",
+		"probes": "None",
+		"hpcs": "yes",
+		"callback": "VestaDacapoCallback",
+		"filter": "no",
+		"window": "4",
+		"variance": "125"
+	},
+	{
+		"suite": "dacapo",
+		"benchmark": "h2",
+		"size": "default",
+		"probes": "None",
+		"hpcs": "yes",
+		"callback": "VestaDacapoCallback",
+		"filter": "no",
+		"window": "4",
+		"variance": "125"
+	},
+	{
+		"suite": "dacapo",
+		"benchmark": "jython",
+		"size": "default",
+		"probes": "None",
+		"hpcs": "yes",
+		"callback": "VestaDacapoCallback",
+		"filter": "no",
+		"window": "4",
+		"variance": "125"
+	},
+	{
+		"suite": "dacapo",
+		"benchmark": "luindex",
+		"size": "default",
+		"probes": "None",
+		"hpcs": "yes",
+		"callback": "VestaDacapoCallback",
+		"filter": "no",
+		"window": "4",
+		"variance": "125"
+	},
+	{
+		"suite": "dacapo",
+		"benchmark": "lusearch",
+		"size": "default",
+		"probes": "None",
+		"hpcs": "yes",
+		"callback": "VestaDacapoCallback",
+		"filter": "no",
+		"window": "4",
+		"variance": "125"
+	},
+	{
+		"suite": "dacapo",
+		"benchmark": "pmd",
+		"size": "default",
+		"probes": "None",
+		"hpcs": "yes",
+		"callback": "VestaDacapoCallback",
+		"filter": "no",
+		"window": "4",
+		"variance": "125"
+	},
+	{
+		"suite": "dacapo",
+		"benchmark": "sunflow",
+		"size": "default",
+		"probes": "None",
+		"hpcs": "yes",
+		"callback": "VestaDacapoCallback",
+		"filter": "no",
+		"window": "4",
+		"variance": "125"
+	},
+	{
+		"suite": "dacapo",
+		"benchmark": "xalan",
+		"size": "default",
+		"probes": "None",
+		"hpcs": "yes",
+		"callback": "VestaDacapoCallback",
+		"filter": "no",
+		"window": "4",
+		"variance": "125"
+	},
+	{
+		"suite": "dacapo",
+		"benchmark": "batik",
+		"size": "default",
+		"probes": "None",
+		"hpcs": "yes",
+		"callback": "VestaDacapoCallback",
+		"filter": "no",
+		"window": "4",
+		"variance": "125"
+	},
+	{
+		"suite": "dacapo",
+		"benchmark": "biojava",
+		"size": "default",
+		"probes": "None",
+		"hpcs": "yes",
+		"callback": "VestaDacapoCallback",
+		"filter": "no",
+		"window": "4",
+		"variance": "125"
+	},
+	{
+		"suite": "dacapo",
+		"benchmark": "fop",
+		"size": "default",
+		"probes": "None",
+		"hpcs": "yes",
+		"callback": "VestaDacapoCallback",
+		"filter": "no",
+		"window": "4",
+		"variance": "125"
+	},
+	{
+		"suite": "dacapo",
+		"benchmark": "graphchi",
+		"size": "default",
+		"probes": "None",
+		"hpcs": "yes",
+		"callback": "VestaDacapoCallback",
+		"filter": "no",
+		"window": "4",
+		"variance": "125"
+	},
+	{
+		"suite": "dacapo",
+		"benchmark": "jme",
+		"size": "default",
+		"probes": "None",
+		"hpcs": "yes",
+		"callback": "VestaDacapoCallback",
+		"filter": "no",
+		"window": "4",
+		"variance": "125"
+	},
+	{
+		"suite": "dacapo",
+		"benchmark": "zxing",
+		"size": "default",
+		"probes": "None",
+		"hpcs": "yes",
+		"callback": "VestaDacapoCallback",
+		"filter": "no",
+		"window": "4",
+		"variance": "125"
+	},
+	{
+		"suite": "renaissance",
+		"benchmark": "scrabble",
+		"probes": "None",
+		"hpcs": "yes",
+		"callback": "VestaRenaissancePlugin",
+		"filter": "no",
+		"window": "4",
+		"variance": "125"
+	},
+	{
+		"suite": "renaissance",
+		"benchmark": "page-rank",
+		"probes": "None",
+		"hpcs": "yes",
+		"callback": "VestaRenaissancePlugin",
+		"filter": "no",
+		"window": "4",
+		"variance": "125"
+	},
+	{
+		"suite": "renaissance",
+		"benchmark": "future-genetic",
+		"probes": "None",
+		"hpcs": "yes",
+		"callback": "VestaRenaissancePlugin",
+		"filter": "no",
+		"window": "4",
+		"variance": "125"
+	},
+	{
+		"suite": "renaissance",
+		"benchmark": "akka-uct",
+		"probes": "None",
+		"hpcs": "yes",
+		"callback": "VestaRenaissancePlugin",
+		"filter": "no",
+		"window": "4",
+		"variance": "125"
+	},
+	{
+		"suite": "renaissance",
+		"benchmark": "movie-lens",
+		"probes": "None",
+		"hpcs": "yes",
+		"callback": "VestaRenaissancePlugin",
+		"filter": "no",
+		"window": "4",
+		"variance": "125"
+	},
+	{
+		"suite": "renaissance",
+		"benchmark": "scala-doku",
+		"probes": "None",
+		"hpcs": "yes",
+		"callback": "VestaRenaissancePlugin",
+		"filter": "no",
+		"window": "4",
+		"variance": "125"
+	},
+	{
+		"suite": "renaissance",
+		"benchmark": "chi-square",
+		"probes": "None",
+		"hpcs": "yes",
+		"callback": "VestaRenaissancePlugin",
+		"filter": "no",
+		"window": "4",
+		"variance": "125"
+	},
+	{
+		"suite": "renaissance",
+		"benchmark": "fj-kmeans",
+		"probes": "None",
+		"hpcs": "yes",
+		"callback": "VestaRenaissancePlugin",
+		"filter": "no",
+		"window": "4",
+		"variance": "125"
+	},
+	{
+		"suite": "renaissance",
+		"benchmark": "rx-scrabble",
+		"probes": "None",
+		"hpcs": "yes",
+		"callback": "VestaRenaissancePlugin",
+		"filter": "no",
+		"window": "4",
+		"variance": "125"
+	},
+	{
+		"suite": "renaissance",
+		"benchmark": "finagle-http",
+		"probes": "None",
+		"hpcs": "yes",
+		"callback": "VestaRenaissancePlugin",
+		"filter": "no",
+		"window": "4",
+		"variance": "125"
+	},
+	{
+		"suite": "renaissance",
+		"benchmark": "reactors",
+		"probes": "None",
+		"hpcs": "yes",
+		"callback": "VestaRenaissancePlugin",
+		"filter": "no",
+		"window": "4",
+		"variance": "125"
+	},
+	{
+		"suite": "renaissance",
+		"benchmark": "dec-tree",
+		"probes": "None",
+		"hpcs": "yes",
+		"callback": "VestaRenaissancePlugin",
+		"filter": "no",
+		"window": "4",
+		"variance": "125"
+	},
+	{
+		"suite": "renaissance",
+		"benchmark": "scala-stm-bench7",
+		"probes": "None",
+		"hpcs": "yes",
+		"callback": "VestaRenaissancePlugin",
+		"filter": "no",
+		"window": "4",
+		"variance": "125"
+	},
+	{
+		"suite": "renaissance",
+		"benchmark": "naive-bayes",
+		"probes": "None",
+		"hpcs": "yes",
+		"callback": "VestaRenaissancePlugin",
+		"filter": "no",
+		"window": "4",
+		"variance": "125"
+	},
+	{
+		"suite": "renaissance",
+		"benchmark": "als",
+		"probes": "None",
+		"hpcs": "yes",
+		"callback": "VestaRenaissancePlugin",
+		"filter": "no",
+		"window": "4",
+		"variance": "125"
+	},
+	{
+		"suite": "renaissance",
+		"benchmark": "par-mnemonics",
+		"probes": "None",
+		"hpcs": "yes",
+		"callback": "VestaRenaissancePlugin",
+		"filter": "no",
+		"window": "4",
+		"variance": "125"
+	},
+	{
+		"suite": "renaissance",
+		"benchmark": "scala-kmeans",
+		"probes": "None",
+		"hpcs": "yes",
+		"callback": "VestaRenaissancePlugin",
+		"filter": "no",
+		"window": "4",
+		"variance": "125"
+	},
+	{
+		"suite": "renaissance",
+		"benchmark": "philosophers",
+		"probes": "None",
+		"hpcs": "yes",
+		"callback": "VestaRenaissancePlugin",
+		"filter": "no",
+		"window": "4",
+		"variance": "125"
+	},
+	{
+		"suite": "renaissance",
+		"benchmark": "log-regression",
+		"probes": "None",
+		"hpcs": "yes",
+		"callback": "VestaRenaissancePlugin",
+		"filter": "no",
+		"window": "4",
+		"variance": "125"
+	},
+	{
+		"suite": "renaissance",
+		"benchmark": "gauss-mix",
+		"probes": "None",
+		"hpcs": "yes",
+		"callback": "VestaRenaissancePlugin",
+		"filter": "no",
+		"window": "4",
+		"variance": "125"
+	},
+	{
+		"suite": "renaissance",
+		"benchmark": "mnemonics",
+		"probes": "None",
+		"hpcs": "yes",
+		"callback": "VestaRenaissancePlugin",
+		"filter": "no",
+		"window": "4",
+		"variance": "125"
+	},
+	{
+		"suite": "renaissance",
+		"benchmark": "dotty",
+		"probes": "None",
+		"hpcs": "yes",
+		"callback": "VestaRenaissancePlugin",
+		"filter": "no",
+		"window": "4",
+		"variance": "125"
+	},
+	{
+		"suite": "renaissance",
+		"benchmark": "finagle-chirper",
+		"probes": "None",
+		"hpcs": "yes",
+		"callback": "VestaRenaissancePlugin",
+		"filter": "no",
+		"window": "4",
+		"variance": "125"
+	}
+]
