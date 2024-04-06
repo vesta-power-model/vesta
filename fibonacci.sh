@@ -6,6 +6,6 @@ dtrace-jdk/bin/java -cp "${PWD}/target/vesta-0.1.0-jar-with-dependencies.jar" \
     -Dvesta.library.path="${PWD}/bin" \
     vesta.MyFibonacci 50 &
 java_pid=$!
-python3 /mnt/c/Users/atpov/Documents/projects/vesta/scripts/java_multi_probe.py --pid "${java_pid}" \
+python3 "${PWD}/scripts/java_multi_probe.py" --pid "${java_pid}" \
     --output_directory="${OUT_DIR}" \
     --probes="${PROBES}"
