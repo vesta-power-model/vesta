@@ -255,6 +255,6 @@ python3 "${PWD}/scripts/java_multi_probe.py" --pid "${java_pid}" \
     --probes="${PROBES}"
 ```
 
-We provide an example script that you can copy and modify to achieve this behavior quickly.
+We provide an example script at `my_fibonacci.sh` that you can copy and modify to achieve this behavior quickly.
 
 Once your experiment completes, you can use the `metrics.py` script as described in the [experiment reproduction](#experiments-reproduction) and used the steps in the [modeling guide](#modeling) to evaluate and model your benchmark.
