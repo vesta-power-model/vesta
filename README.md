@@ -243,7 +243,7 @@ This will produce a `probes.csv` file containing the probing information. The ab
 We recommend creating up script to execute the benchmark sanely:
 
 ```bash
-OUT_DIR=data/my-fibonacci
+OUT_DIR="${PWD}data/my-fibonacci"
 PROBES=...
 dtrace-jdk/bin/java -cp "${PWD}/target/vesta-0.1.0-jar-with-dependencies.jar" \
     -Dvesta.output.directory="${OUT_DIR}" \
