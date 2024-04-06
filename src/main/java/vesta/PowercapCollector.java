@@ -111,6 +111,10 @@ public final class PowercapCollector {
   // TODO: do we want a different data type? what happens if we need more data like counters?
   public void dump() {
     executor.shutdown();
+    if (!samples.isEmpty()) {
+      System.out.println("no energy samples collected!");
+      return;
+    }
     try {
       PrintWriter writer =
           new PrintWriter(

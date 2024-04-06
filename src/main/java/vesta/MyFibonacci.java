@@ -1,7 +1,11 @@
 package vesta;
 
+import static java.util.stream.Collectors.joining;
+
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Arrays;
+import java.util.stream.IntStream;
 
 final class MyFibonacci {
   private static int fib(int n) {
@@ -13,17 +17,32 @@ final class MyFibonacci {
   }
 
   public static void main(String[] args) {
-    int iterations = Integer.parseInt(args[0]);
+    int n = Integer.parseInt(args[0]);
+    int iterations = Integer.parseInt(args[1]);
+    double[] data = new double[iterations];
+
+    System.out.println(String.format("running fib(%d) %d times", n, iterations));
     PowercapCollector collector = new PowercapCollector();
     for (int i = 0; i < iterations; i++) {
       Instant start = Instant.now();
       collector.start();
-      fib(42);
+      fib(n);
       collector.stop();
-      System.out.println(
-          String.format(
-              "computed fib(42) in %s millis", Duration.between(start, Instant.now()).toMillis()));
+      data[i] = Duration.between(start, Instant.now()).toMillis();
+
+      String message = String.format("computed fib(42) in %4.0f millis", data[i]);
+      System.out.print(message);
+      System.out.print(
+          IntStream.range(0, message.length()).mapToObj(unused -> "\b").collect(joining("")));
     }
+    System.out.println();
+    double average = Arrays.stream(data).average().getAsDouble();
+    double deviation =
+        Math.sqrt(
+            Arrays.stream(data).map(elapsed -> elapsed - average).map(i -> i * i).sum()
+                / data.length);
+    System.out.println(
+        String.format("ran fib(%d) in %4.0f +/- %4.4f millis", n, average, deviation));
     collector.dump();
   }
 }
