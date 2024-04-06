@@ -24,7 +24,9 @@ In order to run the experiments (in a Docker image or otherwise), the system mus
 
 ### bcc
 
-[`bpf`](https://docs.kernel.org/bpf) and [`bcc`](https://github.com/iovisor/bcc) are required for `UDST` instrumentation. First you need to enable the kernel headers by updating your configuration, which can be found at either `/proc/config.gz` or `/boot/config-<kernel-version>`. You should ensure the following flags in the configuration are set to `y`:
+[`bpf`](https://docs.kernel.org/bpf) and [`bcc`](https://github.com/iovisor/bcc) must be enabled on the host machine for `UDST` instrumentation. You will need to ensure that your kernel has been compiled with the Linux kernel headers. Most modern distributions of Linux have already been compiled with the headers, so you may not need to do any additional work.
+
+Next you need to enable `bpf` by updating your configuration, which can be found at either `/proc/config.gz` or `/boot/config-<kernel-version>`. You will need to add the following flags (if they are not already present) and set all of them to `y`:
 
 ```
 CONFIG_BPF=y
@@ -150,7 +152,15 @@ mkdir data && python3 scripts/generate_multi_probe_experiment.py \
     --benchmarks=benchmarks.json
 ```
 
-Once your experiment directory is generated, you can run everything with `bash scripts/run_experiments.sh data`.
+Once your experiment directory is generated, you can run everything with `bash scripts/run_experiments.sh data`. After the benchmarks complete, you can check the summary of the experiment by using the `metrics.py` script:
+
+```bash
+python3 metrics.py 
+    --add_argument=data/aligned.csv \
+    --bucket=1000 \
+    --warm_up=5 \
+    data
+```
 
 ## Modeling
 
@@ -179,3 +189,72 @@ python3 scripts/inference.py \
     data/vesta-artifact.json \
     data/vesta-artifact_test.csv
 ```
+
+
+## Creating a custom benchmark
+
+VESTA supports the customization of new Java benchmarks. You can add your Java program to this repository and use the `vesta.PowercapCollector` in your program to add energy data collection:
+
+```java
+package vesta;
+
+final class MyFibonacci {
+    int fib(int n) { ...}
+
+    public static void main(String[] args) {
+        int iterations = Integer.parseInt(args[0]);
+        PowercapCollector collector = new PowercapCollector();
+        for (int i = 0; i < iterations; i++) {
+            collector.start();
+            fib(42);
+            collector.stop();
+        }
+        collector.dump();
+    }
+}
+```
+
+Next, recompile the tool with `mvn package`. You should be able to directly run your benchmark from the newly built jar:
+
+```bash
+OUT_DIR=data/my-fibonacci
+dtrace-jdk/bin/java -cp "${PWD}/target/vesta-0.1.0-jar-with-dependencies.jar" \
+    -Dvesta.output.directory="${OUT_DIR}" \
+    -Dvesta.library.path="${PWD}/bin" \
+    vesta.MyFibonacci 50
+```
+
+The above command will produce `summary.csv`, which contains end-to-end measurements, and `energy.csv`, which contains timestamped measurements` at `data/my-fibonacci`.
+
+Next, add the bpf probing by calling the script on your executing Java program:
+
+```bash
+PROBES=CallObjectMethod__entry,CallObjectMethod__return,CallVoidMethod__entry,CallVoidMethod__return,DestroyJavaVM__entry,DestroyJavaVM__return,GetByteArrayElements__entry,GetByteArrayElements__return,GetEnv__entry,GetEnv__return,GetFloatField__entry,GetFloatField__return,GetLongField__entry,GetLongField__return,GetMethodID__entry,GetMethodID__return,GetObjectArrayElement__entry,GetObjectArrayElement__return,GetObjectClass__entry,GetObjectClass__return,GetStringLength__entry,GetStringLength__return,IsInstanceOf__entry,IsInstanceOf__return,NewDirectByteBuffer__entry,NewDirectByteBuffer__return,NewLongArray__entry,NewLongArray__return,NewString__entry,NewString__return,NewStringUTF__entry,NewStringUTF__return,ReleaseIntArrayElements__entry,ReleaseIntArrayElements__return,ReleaseShortArrayElements__entry,ReleaseShortArrayElements__return,SetByteArrayRegion__entry,SetByteArrayRegion__return,SetIntField__entry,SetIntField__return,Throw__entry,Throw__return,class__initialization__concurrent,class__initialization__error,class__unloaded,compiled__method__load,compiled__method__unload,gc__begin,gc__end,method__compile__begin,method__compile__end,safepoint__begin,safepoint__end,thread__park__begin,thread__park__end,thread__sleep__begin,thread__sleep__end,vmops__begin,vmops__end
+python3 /mnt/c/Users/atpov/Documents/projects/vesta/scripts/java_multi_probe.py --pid "${java_pid}" \
+    --output_directory="${OUT_DIR}" \
+    --probes="${PROBES}"
+```
+
+This will produce a `probes.csv` file containing the probing information. The above list of probes were selected during `VESTA`'s evaluation. You may add or remove probes from this list by consulting the full list of Java's [DTrace Probes](https://docs.oracle.com/javase/8/docs/technotes/guides/vm/dtrace.html); make sure that any instace of a hyphen (`-`) is replaced by two underscores (`__`) if you do add probes. There are two additional caveats regarding modifying the sampled probes:
+
+1. As mentioned in the publication, unselected probes incurred significant overhead 
+2. Language runtime events (LREs) are represented through a pair of probes with the same prefix but ending with `__entry`/`__return` and `__begin`/`__end`. If a given probe does not have its pair, then it will be modeled individually as a counter.
+
+We recommend creating up script to execute the benchmark sanely:
+
+```bash
+OUT_DIR=data/my-fibonacci
+PROBES=...
+dtrace-jdk/bin/java -cp "${PWD}/target/vesta-0.1.0-jar-with-dependencies.jar" \
+    -Dvesta.output.directory="${OUT_DIR}" \
+    -Dvesta.library.path="${PWD}/bin" \
+    vesta.MyFibonacci 50 &
+java_pid=$! # retrieve last process pid
+python3 /mnt/c/Users/atpov/Documents/projects/vesta/scripts/java_multi_probe.py --pid "${java_pid}" \
+    --output_directory="${OUT_DIR}" \
+    --probes="${PROBES}"
+```
+
+We provide an example script that you can copy and modify to achieve this behavior quickly.
+
+Once your experiment completes, you can use the `metrics.py` script as described in the [experiment reproduction](#experiments-reproduction) and used the steps in the [modeling guide](#modeling) to evaluate and model your benchmark.
