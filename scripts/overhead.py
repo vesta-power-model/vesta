@@ -47,7 +47,7 @@ def is_valid_file(file):
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description='jvm probe tracer')
+    parser = argparse.ArgumentParser(description='overhead calculator')
     parser.add_argument('data', type=str, help='path to probing data')
     parser.add_argument('ref', type=str, help='path to reference data')
     parser.add_argument(
