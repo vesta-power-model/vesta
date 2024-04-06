@@ -224,7 +224,7 @@ dtrace-jdk/bin/java -cp "${PWD}/target/vesta-0.1.0-jar-with-dependencies.jar" \
     vesta.MyFibonacci 50
 ```
 
-The above command will produce `summary.csv`, which contains end-to-end measurements, and `energy.csv`, which contains timestamped measurements` at `data/my-fibonacci`.
+The above command will produce `summary.csv`, which contains end-to-end measurements of energy and runtime, and `energy.csv`, which contains timestamped measurements` of energy, at `data/my-fibonacci`.
 
 Next, add the bpf probing by calling the script on your executing Java program:
 
@@ -243,7 +243,7 @@ This will produce a `probes.csv` file containing the probing information. The ab
 We recommend creating up script to execute the benchmark sanely:
 
 ```bash
-OUT_DIR="${PWD}data/my-fibonacci"
+OUT_DIR="${PWD}/data/my-fibonacci"
 PROBES=...
 dtrace-jdk/bin/java -cp "${PWD}/target/vesta-0.1.0-jar-with-dependencies.jar" \
     -Dvesta.output.directory="${OUT_DIR}" \
