@@ -38,11 +38,11 @@ In order to run the experiments (in a Docker image or otherwise), the system mus
 
 ## RAPL
 
-`msr` is required to read the RAPL for energy sampling. For an Intel-Linux system, you will probably need to run `sudo modprobe msr` to enable it.
+[RAPL](https://www.kernel.org/doc/html/next/power/powercap/powercap.html) is a feature for Intel CPUs that allows for sampling counters from the CPU that represent energy consumption since boot. RAPL requires the model-specific registers (`msr`s) to be enabled to allow sampling. For an Intel-Linux system, you will probably need to run `sudo modprobe msr` to enable it.
 
 ## bcc
 
-[`bpf`](https://docs.kernel.org/bpf) and [`bcc`](https://github.com/iovisor/bcc) must be enabled on the host machine for `UDST` instrumentation. You will need to ensure that your kernel has been compiled with the Linux kernel headers. Most modern distributions of Linux have already been compiled with the headers, so you may not need to do any additional work.
+[`bpf`](https://docs.kernel.org/bpf) and [`bcc`](https://github.com/iovisor/bcc) are a set of tools that allow for method profiling of applications. To use VESTA, they must be enabled on the host machine for `UDST` instrumentation even in the Docker image. You will need to ensure that your kernel has been compiled with the Linux kernel headers. Most modern distributions of Linux have already been compiled with the headers, so you may not need to do any additional work.
 
 Next you need to enable `bpf` by updating your configuration, which can be found at either `/proc/config.gz` or `/boot/config-<kernel-version>`. You will need to add the following flags (if they are not already present) and set all of them to `y`:
 
@@ -100,7 +100,7 @@ sudo apk add bcc-tools bcc-doc
 
 ## Java with Dtrace
 
-Finally, you will need a version of `java` with [`DTrace Probes`](https://docs.oracle.com/javase/8/docs/technotes/guides/vm/dtrace.html) enabled is needed to expose the `UDSTs`. Our official repository contains a pre-built version of `openjdk-19` that was used to run our experiments. If you would like to use a different version or you are running this from the github repository, you need to re-compile from [source](https://github.com/openjdk/jdk/blob/master/doc/building.md) with the `--enable-dtrace` flag set.
+Finally, you will need a version of `java` with [`DTrace Probes`](https://docs.oracle.com/javase/8/docs/technotes/guides/vm/dtrace.html) enabled, which will expose the dtrace probes as `UDSTs` that can be instrumented with `bcc`. Our official repository contains a pre-built version of `openjdk-19` that was used to run our experiments. If you would like to use a different version or you are running this from the github repository, you need to re-compile from [source](https://github.com/openjdk/jdk/blob/master/doc/building.md) with the `--enable-dtrace` flag set.
 
 # Running with Docker
 
