@@ -209,7 +209,7 @@ The model, training, and testing data will all be used for producing plots which
 
 ## Making Plots
 
-#Accuracy Plot
+# Accuracy Plot
 
 This script replicates Fig. 5 which shows the MAPE for a set of benchmarks.
 
@@ -224,7 +224,7 @@ python3 scripts/inference.py \
     data/vesta-artifact_test.csv
 ```
 
-#Overhead Plots
+# Overhead Plots
 
 This script replicates Figs. 8-9 which show the wall-clock time and energy overhead for VESTA, respectively. (Note: this does not create the ref-cycle overhead. As of right now it's a bit more involved to get that working in the general case.)
 
@@ -240,7 +240,7 @@ python3 scripts/overhead.py \
 ```
 
 
-#Line Graphs
+# Line Graphs
 
 This script replicates Figs. 6-7 which show the ground power truth alongside predicted power.
 
@@ -256,7 +256,7 @@ python3 scripts/xgboost_ground-truth_graphs.py \
 ```
 It will create as many graphs as there are benchmarks in the testing data.
 
-#SHAP Plots
+# SHAP Plots
 
 This script will create Figs. 10a, 10b, 11
 
@@ -273,7 +273,7 @@ python3 scripts/shap_graphs.py \
 
 Currently, this will make 1 feature importance bar graph, 1 feature importance violin graph (with all features), and n number of SHAP scatter plots where n is the number of features.
 
-#Tree Visualizer
+# Tree Visualizer
 
 This script will replicate the visualizer graph shown in Fig. 13.
 
