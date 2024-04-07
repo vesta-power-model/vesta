@@ -153,7 +153,7 @@ def main():
 
     plt.xticks(ind, df["benchmark"])
 
-    plt.savefig(f"{args.output_directory}wall_clock_overhead.pdf", format="pdf", bbox_inches="tight")
+    plt.savefig(f"{args.output_directory}/wall_clock_overhead.pdf", format="pdf", bbox_inches="tight")
 
 
     #Energy Overhead Graph
