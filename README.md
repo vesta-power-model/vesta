@@ -134,29 +134,51 @@ An experiment is defined using a `json` file. The file should contain a list of 
 
 ```json
 {
-    "suite": "dacapo",
+    "suite": "dacapo", // options: ["dacapo", "renaissance", "custom"]
     "benchmark": "avrora",
-    "size": "default",
+    "size": "default", // only necessary for "dacapo"
     "probes": "NewStringUTF__entry,NewStringUTF__return,SetByteArrayRegion__entry,SetByteArrayRegion__return,thread__park__begin,thread__park__end",
-    "callback": "VestaDacapoCallback",
 },
 ```
 
-We provide a `benchmarks.json` file that describes which experiments to run. You can generate new experiment scripts by running `scripts/generate_multi_probe_experiment.py` with a  `benchmarks.json`. This will create a directory containing the experiment driving code:
+We provide some `json` files that contain the experiments used to produce our data. You can generate new experiment scripts by running `scripts/generate_experiments.py` with a `benchmarks.json`. This will create a directory containing the experiment driving code. The probes listed in `benchmark-confgs/benchmarks.json` were selected during `VESTA`'s screening. You may add or remove probes from this list by consulting the full list of Java's [DTrace Probes](https://docs.oracle.com/javase/8/docs/technotes/guides/vm/dtrace.html); make sure that any instance of a hyphen (`-`) is replaced by two underscores (`__`) if you do add probes. There are two additional caveats regarding modifying the sampled probes:
+
+1. As mentioned in the publication, unselected probes incurred significant overhead 
+2. Language runtime events (LREs) are represented through a pair of probes with the same prefix but ending with `__entry`/`__return` and `__begin`/`__end`. If a given probe does not have its pair, then it will be modeled individually as a counter.
+
+To do a full reproduction, first you'll need to build and run the baseline, i.e. benchmarks with no probing:
 
 ```bash
-mkdir data && python3 scripts/generate_multi_probe_experiment.py \
+python3 scripts/generate_experiments.py \
     --java_path=dtrace-jdk/bin/java \
     --iters=256 \
-    --exp_path=data \
-    --benchmarks=benchmarks.json
+    --exp_path="${PWD}/baseline" \
+    --benchmarks="${PWD}/benchmark-configs/baseline.json"
+bash scripts/run_experiments.sh "${PWD}/baseline"
 ```
 
-Once your experiment directory is generated, you can run everything with `bash scripts/run_experiments.sh data`. After the benchmarks complete, you can check the summary of the experiment by using the `metrics.py` script:
+Then do the same with the probing enabled:
 
 ```bash
-python3 metrics.py 
-    --add_argument=data/aligned.csv \
+python3 scripts/generate_experiments.py \
+    --java_path=dtrace-jdk/bin/java \
+    --iters=256 \
+    --exp_path="${PWD}/data" \
+    --benchmarks="${PWD}/benchmark-configs/benchmarks.json"
+bash scripts/run_experiments.sh "${PWD}/data"
+```
+
+After the benchmarks complete, you can check the summary of the experiment by using the `scripts/overhead.py` `scripts/metrics.py` scripts:
+
+```bash
+python3 scripts/overhead.py 
+    --ref=baseline \
+    --data=data \
+    --bucket=1000 \
+    --warm_up=5 \
+    --output_directory=data
+python3 scripts/metrics.py 
+    --output_directory=data \
     --bucket=1000 \
     --warm_up=5 \
     data
@@ -164,7 +186,7 @@ python3 metrics.py
 
 ## Modeling
 
-The data can be pre-processed into an aligned time-series with:
+The data can be pre-processed into an aligned time-series with `scripts/alignment.py`:
 
 ```bash
 python3 scripts/alignment.py \
@@ -174,7 +196,7 @@ python3 scripts/alignment.py \
     data
 ```
 
-Modeling and evaluation can done through the two provided scripts:
+Modeling is done with the `scripts/model_builder.py`:
 
 ```bash
 python3 scripts/model_builder.py \
@@ -182,6 +204,8 @@ python3 scripts/model_builder.py \
     --name=vesta-artifact \
     data/aligned.csv
 ```
+
+Then you can produce plots using ``:
 
 ```bash
 python3 scripts/inference.py \
@@ -191,9 +215,13 @@ python3 scripts/inference.py \
 ```
 
 
-## Creating a custom benchmark
+## Running a custom benchmark
 
-VESTA supports the customization of new Java benchmarks. You can add your Java program to this repository and use the `vesta.PowercapCollector` in your program to add energy data collection:
+VESTA supports the addition of new Java benchmarks that can be run either standalone or as part of an experiment.
+
+### Creating a Java Benchmark
+
+You can add your Java program to this repository (preferably at `src/main/java/vesta`) and use the `vesta.SampleCollector` in your program to add energy data collection:
 
 ```java
 package vesta;
@@ -203,7 +231,7 @@ final class MyFibonacci {
 
     public static void main(String[] args) {
         int iterations = Integer.parseInt(args[0]);
-        PowercapCollector collector = new PowercapCollector();
+        SampleCollector collector = new SampleCollector();
         for (int i = 0; i < iterations; i++) {
             collector.start();
             fib(42);
@@ -214,7 +242,7 @@ final class MyFibonacci {
 }
 ```
 
-Next, recompile the tool with `mvn package`. You should be able to directly run your benchmark from the newly built jar:
+Next, recompile the tool with `mvn package`; if you have third-party dependencies, you should add them to the `pom.xml`. You should be able to directly run your benchmark from the newly built jar:
 
 ```bash
 OUT_DIR=data/my-fibonacci
@@ -226,35 +254,48 @@ dtrace-jdk/bin/java -cp "${PWD}/target/vesta-0.1.0-jar-with-dependencies.jar" \
 
 The above command will produce `summary.csv`, which contains end-to-end measurements of energy and runtime, and `energy.csv`, which contains timestamped measurements` of energy, at `data/my-fibonacci`.
 
-Next, add the bpf probing by calling the script on your executing Java program:
+### BPF Probing
+
+Next, you can do bpf probing by calling the `scripts/java_multi_probe.py` script on your executing Java program:
 
 ```bash
-PROBES=CallObjectMethod__entry,CallObjectMethod__return,CallVoidMethod__entry,CallVoidMethod__return,DestroyJavaVM__entry,DestroyJavaVM__return,GetByteArrayElements__entry,GetByteArrayElements__return,GetEnv__entry,GetEnv__return,GetFloatField__entry,GetFloatField__return,GetLongField__entry,GetLongField__return,GetMethodID__entry,GetMethodID__return,GetObjectArrayElement__entry,GetObjectArrayElement__return,GetObjectClass__entry,GetObjectClass__return,GetStringLength__entry,GetStringLength__return,IsInstanceOf__entry,IsInstanceOf__return,NewDirectByteBuffer__entry,NewDirectByteBuffer__return,NewLongArray__entry,NewLongArray__return,NewString__entry,NewString__return,NewStringUTF__entry,NewStringUTF__return,ReleaseIntArrayElements__entry,ReleaseIntArrayElements__return,ReleaseShortArrayElements__entry,ReleaseShortArrayElements__return,SetByteArrayRegion__entry,SetByteArrayRegion__return,SetIntField__entry,SetIntField__return,Throw__entry,Throw__return,class__initialization__concurrent,class__initialization__error,class__unloaded,compiled__method__load,compiled__method__unload,gc__begin,gc__end,method__compile__begin,method__compile__end,safepoint__begin,safepoint__end,thread__park__begin,thread__park__end,thread__sleep__begin,thread__sleep__end,vmops__begin,vmops__end
-python3 /mnt/c/Users/atpov/Documents/projects/vesta/scripts/java_multi_probe.py --pid "${java_pid}" \
+PROBES=NewStringUTF__entry,NewStringUTF__return,SetByteArrayRegion__entry,SetByteArrayRegion__return,thread__park__begin,thread__park__end
+python3 /mnt/c/Users/atpov/Documents/projects/vesta/scripts/java_multi_probe.py --pid "${pid}" \
     --output_directory="${OUT_DIR}" \
     --probes="${PROBES}"
 ```
 
-This will produce a `probes.csv` file containing the probing information. The above list of probes were selected during `VESTA`'s evaluation. You may add or remove probes from this list by consulting the full list of Java's [DTrace Probes](https://docs.oracle.com/javase/8/docs/technotes/guides/vm/dtrace.html); make sure that any instace of a hyphen (`-`) is replaced by two underscores (`__`) if you do add probes. There are two additional caveats regarding modifying the sampled probes:
+This will produce a `probes.csv` file containing the probing information.
 
-1. As mentioned in the publication, unselected probes incurred significant overhead 
-2. Language runtime events (LREs) are represented through a pair of probes with the same prefix but ending with `__entry`/`__return` and `__begin`/`__end`. If a given probe does not have its pair, then it will be modeled individually as a counter.
+### Collecting data for `VESTA`
 
-We recommend creating up script to execute the benchmark sanely:
+You can manually execute the benchmark as a sanity test with a small script:
 
 ```bash
 OUT_DIR="${PWD}/data/my-fibonacci"
-PROBES=...
+PROBES=NewStringUTF__entry,NewStringUTF__return,SetByteArrayRegion__entry,SetByteArrayRegion__return,thread__park__begin,thread__park__end
 dtrace-jdk/bin/java -cp "${PWD}/target/vesta-0.1.0-jar-with-dependencies.jar" \
     -Dvesta.output.directory="${OUT_DIR}" \
     -Dvesta.library.path="${PWD}/bin" \
     vesta.MyFibonacci 50 &
-java_pid=$! # retrieve last process pid
-python3 "${PWD}/scripts/java_multi_probe.py" --pid "${java_pid}" \
+pid=$! # retrieve last process pid
+python3 "${PWD}/scripts/java_multi_probe.py" --pid "${pid}" \
     --output_directory="${OUT_DIR}" \
     --probes="${PROBES}"
 ```
 
-We provide an example script at `my_fibonacci.sh` that you can copy and modify to achieve this behavior quickly.
+We provide an example script at `scripts/my_fibonacci.sh` that you can copy and modify to achieve this behavior quickly.
 
-Once your experiment completes, you can use the `metrics.py` script as described in the [experiment reproduction](#experiments-reproduction) and used the steps in the [modeling guide](#modeling) to evaluate and model your benchmark.
+You can then add your benchmark to a `benchmarks.json` file as a `"custom"` suite:
+
+```json
+{
+    "suite": "custom",  
+    "benchmark": "my-fibonacci",
+    "main_class": "vesta.MyFibonacci",
+    "args": "42 {iters}",
+    "probes": "NewStringUTF__entry,NewStringUTF__return,SetByteArrayRegion__entry,SetByteArrayRegion__return,thread__park__begin,thread__park__end",
+}
+````
+
+Now you can follow the steps in the [experiment reproduction](#experiments-reproduction) and [modeling guide](#modeling) to evaluate and model with your new benchmark.

@@ -93,7 +93,9 @@ public final class Rapl {
     }
   }
 
-  /** @returns the sum of all energy counters */
+  /**
+   * @returns the sum of all energy counters
+   */
   // TODO: this doesn't work since it ignores wrap around
   public synchronized double getEnergy() {
     // guard if CPUScaler isn't available

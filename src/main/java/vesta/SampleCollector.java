@@ -11,11 +11,11 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.stream.IntStream;
-import java.util.List;
 
 /**
  * Data collector that produces both a runtime {@code Summary} and a online collection of
@@ -50,7 +50,7 @@ public final class SampleCollector {
   private final ArrayList<Sample> samples = new ArrayList<>();
   private final ExecutorService executor;
 
-  private boolean isRunning = false;
+  private volatile boolean isRunning = false;
   private Future<ArrayList<Sample>> sampleFuture;
 
   private Sample summaryStart;
@@ -104,7 +104,7 @@ public final class SampleCollector {
     }
 
     iteration++;
-    summaryStart = null;
+    // summaryStart = null;
   }
 
   /** Writes the {@link Summary} and {@link Samples} to the underlying directory as csvs. */
@@ -138,8 +138,9 @@ public final class SampleCollector {
           new PrintWriter(
               new BufferedWriter(
                   new FileWriter(
-                      String.join("/", System.getProperty("vesta.output.directory"), "energy.csv"))));
-      int componentCount = samples.get(0).energy[0].length * Rapl.getInstance().getSocketCount();
+                      String.join(
+                          "/", System.getProperty("vesta.output.directory"), "energy.csv"))));
+      int componentCount = samples.get(0).energy[0].length * Powercap.SOCKET_COUNT;
       writer.println(
           String.join(
               ",",
@@ -234,6 +235,13 @@ public final class SampleCollector {
       this.timestamp = timestamp;
       this.energy = energy;
     }
+
+    @Override
+    public String toString() {
+      return String.format(
+          "%d,%d,%s",
+          iteration, timestamp, Arrays.stream(energy).map(Arrays::toString).collect(joining(",")));
+    }
   }
 
   // helpers methods that grab/handle data
@@ -244,18 +252,14 @@ public final class SampleCollector {
   }
 
   private static double[][] getEnergy() {
-    return Rapl.getInstance(String.join("/", System.getProperty("vesta.library.path"), "libRapl.so"))
-        .getEnergyStats();
+    return Powercap.getEnergyStats();
   }
 
   private static double computeEnergyDifference(double[][] first, double[][] second) {
     double energy = 0;
-    for (int socket = 0; socket < Rapl.getInstance().getSocketCount(); socket++) {
+    for (int socket = 0; socket < Powercap.SOCKET_COUNT; socket++) {
       for (int component = 0; component < first[socket].length; component++) {
         double diff = second[socket][component] - first[socket][component];
-        if (diff < 0) {
-          diff += Rapl.getInstance().getWrapAroundEnergy();
-        }
         energy += diff;
       }
     }

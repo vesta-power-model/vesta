@@ -22,7 +22,7 @@ final class MyFibonacci {
     double[] data = new double[iterations];
 
     System.out.println(String.format("running fib(%d) %d times", n, iterations));
-    PowercapCollector collector = new PowercapCollector();
+    SampleCollector collector = new SampleCollector();
     for (int i = 0; i < iterations; i++) {
       Instant start = Instant.now();
       collector.start();
@@ -30,7 +30,7 @@ final class MyFibonacci {
       collector.stop();
       data[i] = Duration.between(start, Instant.now()).toMillis();
 
-      String message = String.format("computed fib(42) in %4.0f millis", data[i]);
+      String message = String.format("computed fib(%d) in %4.0f millis", n, data[i]);
       System.out.print(message);
       System.out.print(
           IntStream.range(0, message.length()).mapToObj(unused -> "\b").collect(joining("")));
