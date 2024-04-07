@@ -14,15 +14,33 @@ Java Virtual Machine (JVM), `VESTA` is capable of predicting energy consumption 
 percentage error of 1.56\% while incurring a minimal performance and energy overhead.
 ```
 
-## Setup
+# Table of Contents
+
+- [Setup](#setup)
+  - [RAPL](#rapl)
+  - [bcc](#bcc)
+  - [Java with DTrace](#java-with-dtrace)
+- [Running with Docker](#running-with-docker)
+- [Running from Source](#running-from-source)
+- [Experiment Reproduction](#experiment-reproduction)
+  - [Adding a custom benchmark](#adding-a-custom-benchmark)
+- [Evaluation and Plots](#evaluation-and-plots)
+  - [Modeling](#modeling)
+  - [Accuracy Plot](#accuracy-plot)
+  - [Overhead Plots](#overhead-plots)
+  - [Line Graphs](#line-graphs)
+  - [SHAP Plots](#shap-plots)
+  - [Tree Visualizer](#tree-visualizer)
+
+# Setup
 
 In order to run the experiments (in a Docker image or otherwise), the system must be Intel + Linux and you must have `sudo` access in order to collect the data for the experiments. These following steps must be done on your system even if you are running through the Docker image.
 
-### RAPL
+## RAPL
 
 `msr` is required to read the RAPL for energy sampling. For an Intel-Linux system, you will probably need to run `sudo modprobe msr` to enable it.
 
-### bcc
+## bcc
 
 [`bpf`](https://docs.kernel.org/bpf) and [`bcc`](https://github.com/iovisor/bcc) must be enabled on the host machine for `UDST` instrumentation. You will need to ensure that your kernel has been compiled with the Linux kernel headers. Most modern distributions of Linux have already been compiled with the headers, so you may not need to do any additional work.
 
@@ -80,11 +98,11 @@ sudo amazon-linux-extras install BCC
 sudo apk add bcc-tools bcc-doc
 ```
 
-### Java with Dtrace
+## Java with Dtrace
 
 Finally, you will need a version of `java` with [`DTrace Probes`](https://docs.oracle.com/javase/8/docs/technotes/guides/vm/dtrace.html) enabled is needed to expose the `UDSTs`. Our official repository contains a pre-built version of `openjdk-19` that was used to run our experiments. If you would like to use a different version or you are running this from the github repository, you need to re-compile from [source](https://github.com/openjdk/jdk/blob/master/doc/building.md) with the `--enable-dtrace` flag set.
 
-## Running with Docker
+# Running with Docker
 
 We provide a Dockerfile in this repository that should correctly set up the environment to have access to both `msr` and `bpf` so you can run the experiments. You will need to run it with the following flags for everything to work:
 
@@ -97,9 +115,11 @@ sudo docker run -it --rm  --privileged \
     vesta
 ```
 
-If you are trying to reproduce the experiments from the github repo, you will need to get the benchmark jars before building the Docker image, which can be done with `bash setup_benchmarks.sh`.
+NOTE: If you are trying to reproduce the experiments from the github repo, you will need to get the benchmark jars before building the Docker image, which can be done with `bash setup_benchmarks.sh`.
 
-## Running from Source
+Once inside the image, you can use `vesta/scripts/my_fibonacci.sh` as a smoke test to confirm that you will be able to collect all the necessary data.
+
+# Running from Source
 
 You can also reproduce our experiments directly from this repository. Our experiments were run on the following system:
 
@@ -110,15 +130,15 @@ Debian 11
 Linux kernel 5.17.0-3-amd64
 ```
 
-### Setup
+## Setup
 
-First you should install the following:
+First you should install the following package on your system to support the experiments and modeling:
 
 ```
 apt-get install -y git wget openjdk-11-jdk make \
     gcc maven bpftrace bpfcc-tools libbpfcc libbpfcc-dev \
-    python3 python3-pip
-pip3 install numpy pandas pytest numba xgboost scikit-learn
+    python3 python3-pip graphviz
+pip3 install numpy pandas pytest numba xgboost scikit-learn shap
 ```
 If you are not on Debian. your system's package manager likely has similar targets.
 
@@ -128,7 +148,7 @@ If you are not on Debian. your system's package manager likely has similar targe
 
 3. run `make native` to build the native libraries used for runtime sampling.
 
-## Experiments Reproduction
+# Experiment Reproduction
 
 An experiment is defined using a `json` file. The file should contain a list of dicts that define the parameters for the experiments:
 
@@ -144,9 +164,9 @@ An experiment is defined using a `json` file. The file should contain a list of 
 We provide some `json` files that contain the experiments used to produce our data. You can generate new experiment scripts by running `scripts/generate_experiments.py` with a `benchmarks.json`. This will create a directory containing the experiment driving code. The probes listed in `benchmark-confgs/benchmarks.json` were selected during `VESTA`'s screening. You may add or remove probes from this list by consulting the full list of Java's [DTrace Probes](https://docs.oracle.com/javase/8/docs/technotes/guides/vm/dtrace.html); make sure that any instance of a hyphen (`-`) is replaced by two underscores (`__`) if you do add probes. There are two additional caveats regarding modifying the sampled probes:
 
 1. As mentioned in the publication, unselected probes incurred significant overhead 
-2. Language runtime events (LREs) are represented through a pair of probes with the same prefix but ending with `__entry`/`__return` and `__begin`/`__end`. If a given probe does not have its pair, then it will be modeled individually as a counter.
+2. Language runtime events (LREs) are represented through a pair of probes with the same prefix but ending with `__entry`/`__return` and `__begin`/`__end`. If a given probe does not have its corresponding partner probe, then it will be modeled individually as a counter.
 
-To do a full reproduction, first you'll need to build and run the baseline, i.e. benchmarks with no probing:
+To do a full reproduction, first you'll need to build and run the baseline, i.e. executing the benchmarks with no probing:
 
 ```bash
 python3 scripts/generate_experiments.py \
@@ -168,7 +188,9 @@ python3 scripts/generate_experiments.py \
 bash scripts/run_experiments.sh "${PWD}/data"
 ```
 
-## Running a custom benchmark
+NOTE: If you are running this from outside of the Docker image, make sure that you execute `scripts/run_experiments` as sudo (`sudo bash scripts/run_experiments.sh "${PWD}/data"`)
+
+## Adding a custom benchmark
 
 VESTA supports the addition of new Java benchmarks that can be run either standalone or as part of an experiment.
 
@@ -251,11 +273,11 @@ You can then add your benchmark to a `benchmarks.json` file as a `"custom"` suit
 }
 ````
 
-Now you can follow the steps in the [experiment reproduction](#experiments-reproduction) and [modeling guide](#modeling) to evaluate and model with your new benchmark.
+Now you can follow the steps in the [experiment reproduction](#experiments-reproduction) to run your benchmark as part of an experiment.
 
-## Evaluation and Plotting
+# Evaluation and Plots
 
-### Modeling
+## Modeling
 
 The data can be pre-processed into an aligned time-series with `scripts/alignment.py`:
 
@@ -279,7 +301,7 @@ python3 scripts/model_builder.py \
 The model, training, and testing data will all be used for producing plots which can be used to learn about how the tracked runtime events affect power consumption.
 
 
-### Accuracy Plot
+## Accuracy Plot
 
 This script replicates Fig. 5 which shows the MAPE for a set of benchmarks.
 
@@ -294,7 +316,7 @@ python3 scripts/inference.py \
     "${PWD}/data/vesta-artifact_test.csv"
 ```
 
-### Overhead Plots
+## Overhead Plots
 
 This script replicates Figs. 8-9 which show the wall-clock time and energy overhead for VESTA, respectively. (Note: this does not create the ref-cycle overhead. As of right now it's a bit more involved to get that working in the general case.)
 
@@ -304,7 +326,7 @@ The graph can be created with the following:
 
 ```bash
 python3 scripts/overhead.py \
-    --out_path="${PWD}/data" \
+    --output_directory="${PWD}/data" \
     "${PWD}/data" \
     "${PWD}/baseline"
 ```
@@ -321,8 +343,8 @@ The graphs can be created with the following:
 ```bash
 python3 scripts/xgboost_ground-truth_graphs.py \
     --output_directory="${PWD}/data" \
-    "${data}/vesta-artifact.json" \
-    "${data}/vesta-artifact_test.csv"
+    "${PWD}/data/vesta-artifact.json" \
+    "${PWD}/data/vesta-artifact_test.csv"
 ```
 It will create as many graphs as there are benchmarks in the testing data.
 

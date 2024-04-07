@@ -182,7 +182,7 @@ def main():
 
     plt.xticks(ind, df["benchmark"])
 
-    plt.savefig(f"{args.output_directory}energy_overhead.pdf", format="pdf", bbox_inches="tight")
+    plt.savefig(f"{args.output_directory}/energy_overhead.pdf", format="pdf", bbox_inches="tight")
     
 if __name__ == '__main__':
     main()
