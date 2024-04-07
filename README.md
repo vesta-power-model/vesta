@@ -207,88 +207,6 @@ python3 scripts/model_builder.py \
 
 The model, training, and testing data will all be used for producing plots which can be used to learn about how the tracked runtime events affect power consumption.
 
-## Making Plots
-
-# Accuracy Plot
-
-This script replicates Fig. 5 which shows the MAPE for a set of benchmarks.
-
-The structure for calling the script is as follows: `python3 scripts/inference.py <model json> <testing data csv> --out_path=<location and name of pdf to create>`
-
-The graph can be created with the following:
-
-```bash
-python3 scripts/inference.py \
-    --out_path=data/vesta-artifact_inference.pdf \
-    data/vesta-artifact.json \
-    data/vesta-artifact_test.csv
-```
-
-# Overhead Plots
-
-This script replicates Figs. 8-9 which show the wall-clock time and energy overhead for VESTA, respectively. (Note: this does not create the ref-cycle overhead. As of right now it's a bit more involved to get that working in the general case.)
-
-The structure for calling the script is as follows: `python3 scripts/overhead.py <path to directory that has the test data> <path to directory that has the baseline data> --output_directory=<location of where to put overhead pdfs>`
-
-The graph can be created with the following:
-
-```bash
-python3 scripts/overhead.py \
-    --out_path=data/ \
-    data/ \
-    baseline/
-```
-
-
-# Line Graphs
-
-This script replicates Figs. 6-7 which show the ground power truth alongside predicted power.
-
-The structure for calling the script is as follows: `python3 scripts/xgboost_ground-truth_graphs.py <model json> <testing data csv> --output_directory=<path to directory where pdfs will be stored>`
-
-The graphs can be created with the following:
-
-```bash
-python3 scripts/xgboost_ground-truth_graphs.py \
-    --output_directory=data/ \
-    data/vesta-artifact.json \
-    data/vesta-artifact_test.csv
-```
-It will create as many graphs as there are benchmarks in the testing data.
-
-# SHAP Plots
-
-This script will create Figs. 10a, 10b, 11
-
-The structure for calling the script is as follows: `python3 scripts/shap_graphs.py <model json> <training data csv> --output_directory=<path to directory where pdfs will be stored>`
-
-The graphs can be created with the following:
-
-```bash
-python3 scripts/shap_graphs.py \
-    --output_directory=data/ \
-    data/vesta-artifact.json \
-    data/vesta-artifact_train.csv
-```
-
-Currently, this will make 1 feature importance bar graph, 1 feature importance violin graph (with all features), and n number of SHAP scatter plots where n is the number of features.
-
-# Tree Visualizer
-
-This script will replicate the visualizer graph shown in Fig. 13.
-
-The structure for calling the script is as follows: `python3 scripts/tree_visualizer.py <model json> <training data csv> <testing data csv> <index> --output_directory=<path to directory where pdfs will be stored>`
-
-Assuming you would like to view the prediction path from the 1000th datapoint in the testing data, the graphs can be created with the following:
-
-```bash
-python3 scripts/tree_visualizer.py \
-    --output_directory=data/ \
-    data/vesta-artifact.json \
-    data/vesta-artifact_train.csv \
-    data/vesta-artifact_test.csv \
-    1000
-```
 
 ## Running a custom benchmark
 
@@ -374,3 +292,86 @@ You can then add your benchmark to a `benchmarks.json` file as a `"custom"` suit
 ````
 
 Now you can follow the steps in the [experiment reproduction](#experiments-reproduction) and [modeling guide](#modeling) to evaluate and model with your new benchmark.
+
+# Making Plots
+
+## Accuracy Plot
+
+This script replicates Fig. 5 which shows the MAPE for a set of benchmarks.
+
+The structure for calling the script is as follows: `python3 scripts/inference.py <model json> <testing data csv> --out_path=<location and name of pdf to create>`
+
+The graph can be created with the following:
+
+```bash
+python3 scripts/inference.py \
+    --out_path=data/vesta-artifact_inference.pdf \
+    data/vesta-artifact.json \
+    data/vesta-artifact_test.csv
+```
+
+## Overhead Plots
+
+This script replicates Figs. 8-9 which show the wall-clock time and energy overhead for VESTA, respectively. (Note: this does not create the ref-cycle overhead. As of right now it's a bit more involved to get that working in the general case.)
+
+The structure for calling the script is as follows: `python3 scripts/overhead.py <path to directory that has the test data> <path to directory that has the baseline data> --output_directory=<location of where to put overhead pdfs>`
+
+The graph can be created with the following:
+
+```bash
+python3 scripts/overhead.py \
+    --out_path=data/ \
+    data/ \
+    baseline/
+```
+
+
+## Line Graphs
+
+This script replicates Figs. 6-7 which show the ground power truth alongside predicted power.
+
+The structure for calling the script is as follows: `python3 scripts/xgboost_ground-truth_graphs.py <model json> <testing data csv> --output_directory=<path to directory where pdfs will be stored>`
+
+The graphs can be created with the following:
+
+```bash
+python3 scripts/xgboost_ground-truth_graphs.py \
+    --output_directory=data/ \
+    data/vesta-artifact.json \
+    data/vesta-artifact_test.csv
+```
+It will create as many graphs as there are benchmarks in the testing data.
+
+## SHAP Plots
+
+This script will create Figs. 10a, 10b, 11
+
+The structure for calling the script is as follows: `python3 scripts/shap_graphs.py <model json> <training data csv> --output_directory=<path to directory where pdfs will be stored>`
+
+The graphs can be created with the following:
+
+```bash
+python3 scripts/shap_graphs.py \
+    --output_directory=data/ \
+    data/vesta-artifact.json \
+    data/vesta-artifact_train.csv
+```
+
+Currently, this will make 1 feature importance bar graph, 1 feature importance violin graph (with all features), and n number of SHAP scatter plots where n is the number of features.
+
+## Tree Visualizer
+
+This script will replicate the visualizer graph shown in Fig. 13.
+
+The structure for calling the script is as follows: `python3 scripts/tree_visualizer.py <model json> <training data csv> <testing data csv> <index> --output_directory=<path to directory where pdfs will be stored>`
+
+Assuming you would like to view the prediction path from the 1000th datapoint in the testing data, the graphs can be created with the following:
+
+```bash
+python3 scripts/tree_visualizer.py \
+    --output_directory=data/ \
+    data/vesta-artifact.json \
+    data/vesta-artifact_train.csv \
+    data/vesta-artifact_test.csv \
+    1000
+```
