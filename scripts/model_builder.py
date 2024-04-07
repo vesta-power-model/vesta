@@ -8,7 +8,7 @@ import argparse
 parser = argparse.ArgumentParser(description="Model Builder Parser", formatter_class=argparse.RawDescriptionHelpFormatter)
 parser.add_argument("aligned_filename",help="Path to file created by alignment.py")
 parser.add_argument("-n", "--name", type=str, help="Name of model being built; i.e., -n \"model\" creates model.json, model_test.csv, and model_train.csv", default="model")
-parser.add_argument("-o","--out_path", type=str,help="Path where model is stored; i.e, -o \".\" stores model.json in the current directory", default="./")
+parser.add_argument("-o","--out_path", type=str,help="Path where model is stored; i.e, -o \".\" stores model.json in the current directory", default=".")
 parser.add_argument("-t","--xgb_tree", type=str,help="The xgboost tree method to use.", default="hist")
 parser.set_defaults(verbose=False)
 args = parser.parse_args() 

@@ -19,7 +19,7 @@ def parse_args():
 
     args = parser.parse_args()
     if args.output_directory is None:
-        args.output_directory = "./"
+        args.output_directory = "."
 
     return args
 

@@ -168,46 +168,6 @@ python3 scripts/generate_experiments.py \
 bash scripts/run_experiments.sh "${PWD}/data"
 ```
 
-After the benchmarks complete, you can check the summary of the experiment by using the `scripts/overhead.py` `scripts/metrics.py` scripts:
-
-```bash
-python3 scripts/overhead.py 
-    --ref=baseline \
-    --data=data \
-    --bucket=1000 \
-    --warm_up=5 \
-    --output_directory=data
-python3 scripts/metrics.py 
-    --output_directory=data \
-    --bucket=1000 \
-    --warm_up=5 \
-    data
-```
-
-## Modeling
-
-The data can be pre-processed into an aligned time-series with `scripts/alignment.py`:
-
-```bash
-python3 scripts/alignment.py \
-    --out_file_name=data/aligned.csv \
-    --bucket=1000 \
-    --warm_up=5 \
-    data
-```
-
-Modeling is done with the `scripts/model_builder.py`:
-
-```bash
-python3 scripts/model_builder.py \
-    --out_path=data \
-    --name=vesta-artifact \
-    data/aligned.csv
-```
-
-The model, training, and testing data will all be used for producing plots which can be used to learn about how the tracked runtime events affect power consumption.
-
-
 ## Running a custom benchmark
 
 VESTA supports the addition of new Java benchmarks that can be run either standalone or as part of an experiment.
@@ -238,14 +198,14 @@ final class MyFibonacci {
 Next, recompile the tool with `mvn package`; if you have third-party dependencies, you should add them to the `pom.xml`. You should be able to directly run your benchmark from the newly built jar:
 
 ```bash
-OUT_DIR=data/my-fibonacci
+OUT_DIR="${data}/my-fibonacci"
 dtrace-jdk/bin/java -cp "${PWD}/target/vesta-0.1.0-jar-with-dependencies.jar" \
     -Dvesta.output.directory="${OUT_DIR}" \
     -Dvesta.library.path="${PWD}/bin" \
     vesta.MyFibonacci 50
 ```
 
-The above command will produce `summary.csv`, which contains end-to-end measurements of energy and runtime, and `energy.csv`, which contains timestamped measurements` of energy, at `data/my-fibonacci`.
+The above command will produce `summary.csv`, which contains end-to-end measurements of energy and runtime, and `energy.csv`, which contains timestamped measurements` of energy, at `"${data}/my-fibonacci"`.
 
 ### BPF Probing
 
@@ -265,7 +225,7 @@ This will produce a `probes.csv` file containing the probing information.
 You can manually execute the benchmark as a sanity test with a small script:
 
 ```bash
-OUT_DIR="${PWD}/data/my-fibonacci"
+OUT_DIR="${PWD}/"${data}/my-fibonacci""
 PROBES=NewStringUTF__entry,NewStringUTF__return,SetByteArrayRegion__entry,SetByteArrayRegion__return,thread__park__begin,thread__park__end
 dtrace-jdk/bin/java -cp "${PWD}/target/vesta-0.1.0-jar-with-dependencies.jar" \
     -Dvesta.output.directory="${OUT_DIR}" \
@@ -293,9 +253,33 @@ You can then add your benchmark to a `benchmarks.json` file as a `"custom"` suit
 
 Now you can follow the steps in the [experiment reproduction](#experiments-reproduction) and [modeling guide](#modeling) to evaluate and model with your new benchmark.
 
-# Making Plots
+## Evaluation and Plotting
 
-## Accuracy Plot
+### Modeling
+
+The data can be pre-processed into an aligned time-series with `scripts/alignment.py`:
+
+```bash
+python3 scripts/alignment.py \
+    --out_file_name="${PWD}/data/aligned.csv" \
+    --bucket=1000 \
+    --warm_up=5 \
+    data
+```
+
+Modeling is done with the `scripts/model_builder.py`:
+
+```bash
+python3 scripts/model_builder.py \
+    --out_path="${PWD}/data" \
+    --name=vesta-artifact \
+    "${PWD}/data/aligned.csv"
+```
+
+The model, training, and testing data will all be used for producing plots which can be used to learn about how the tracked runtime events affect power consumption.
+
+
+### Accuracy Plot
 
 This script replicates Fig. 5 which shows the MAPE for a set of benchmarks.
 
@@ -305,12 +289,12 @@ The graph can be created with the following:
 
 ```bash
 python3 scripts/inference.py \
-    --out_path=data/vesta-artifact_inference.pdf \
-    data/vesta-artifact.json \
-    data/vesta-artifact_test.csv
+    --out_path="${PWD}/data/vesta-artifact_inference.pdf" \
+    "${PWD}/data/vesta-artifact.json" \
+    "${PWD}/data/vesta-artifact_test.csv"
 ```
 
-## Overhead Plots
+### Overhead Plots
 
 This script replicates Figs. 8-9 which show the wall-clock time and energy overhead for VESTA, respectively. (Note: this does not create the ref-cycle overhead. As of right now it's a bit more involved to get that working in the general case.)
 
@@ -320,9 +304,9 @@ The graph can be created with the following:
 
 ```bash
 python3 scripts/overhead.py \
-    --out_path=data/ \
-    data/ \
-    baseline/
+    --out_path="${PWD}/data" \
+    "${PWD}/data" \
+    "${PWD}/baseline"
 ```
 
 
@@ -336,9 +320,9 @@ The graphs can be created with the following:
 
 ```bash
 python3 scripts/xgboost_ground-truth_graphs.py \
-    --output_directory=data/ \
-    data/vesta-artifact.json \
-    data/vesta-artifact_test.csv
+    --output_directory="${PWD}/data" \
+    "${data}/vesta-artifact.json" \
+    "${data}/vesta-artifact_test.csv"
 ```
 It will create as many graphs as there are benchmarks in the testing data.
 
@@ -352,9 +336,9 @@ The graphs can be created with the following:
 
 ```bash
 python3 scripts/shap_graphs.py \
-    --output_directory=data/ \
-    data/vesta-artifact.json \
-    data/vesta-artifact_train.csv
+    --output_directory="${PWD}/data" \
+    "${PWD}/data/vesta-artifact.json" \
+    "${PWD}/data/vesta-artifact_train.csv"
 ```
 
 Currently, this will make 1 feature importance bar graph, 1 feature importance violin graph (with all features), and n number of SHAP scatter plots where n is the number of features.
@@ -369,9 +353,9 @@ Assuming you would like to view the prediction path from the 1000th datapoint in
 
 ```bash
 python3 scripts/tree_visualizer.py \
-    --output_directory=data/ \
-    data/vesta-artifact.json \
-    data/vesta-artifact_train.csv \
-    data/vesta-artifact_test.csv \
+    --output_directory="${PWD}/data" \
+    "${PWD}/data/vesta-artifact".json \
+    "${PWD}/data/vesta-artifact_train".csv \
+    "${PWD}/data/vesta-artifact_test".csv \
     1000
 ```
