@@ -1,14 +1,13 @@
 package vesta;
 
-import javax.security.auth.callback.Callback;
 import org.renaissance.Plugin;
 
-/** {@link Callback} for renaissance that wraps usage of the {@link SampleCollector}. */
+/** {@link Plugin} for renaissance that wraps usage of the {@link SampleCollector}. */
 public class VestaRenaissancePlugin
     implements Plugin.BeforeBenchmarkTearDownListener,
         Plugin.AfterOperationSetUpListener,
         Plugin.BeforeOperationTearDownListener {
-  private final PowercapCollector collector = new PowercapCollector();
+  private final SampleCollector collector = new SampleCollector();
 
   @Override
   public void afterOperationSetUp(String benchmark, int opIndex, boolean isLastOp) {

@@ -5,7 +5,7 @@ import org.dacapo.harness.CommandLineArgs;
 
 /** {@link Callback} for dacapo that wraps usage of the {@link SampleCollector}. */
 public class VestaDacapoCallback extends Callback {
-  private final PowercapCollector collector = new PowercapCollector();
+  private final SampleCollector collector = new SampleCollector();
 
   public VestaDacapoCallback(CommandLineArgs args) {
     super(args);

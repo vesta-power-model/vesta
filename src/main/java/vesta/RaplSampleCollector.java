@@ -11,17 +11,17 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.stream.IntStream;
+import java.util.List;
 
 /**
  * Data collector that produces both a runtime {@code Summary} and a online collection of
  * {@Samples}.
  */
-public final class PowercapCollector {
+public final class RaplSampleCollector {
   /** Loads the data from the baseline and computes the mean runtime after {@code warmUp}. */
   // TODO: this doesn't report a missing baseline verbosely. should we fail if it's missing?
   public static double getBaselineRuntime(int warmUp) {
@@ -50,13 +50,13 @@ public final class PowercapCollector {
   private final ArrayList<Sample> samples = new ArrayList<>();
   private final ExecutorService executor;
 
-  private volatile boolean isRunning = false;
+  private boolean isRunning = false;
   private Future<ArrayList<Sample>> sampleFuture;
 
   private Sample summaryStart;
   private int iteration = 0;
 
-  public PowercapCollector() {
+  public RaplSampleCollector() {
     executor = Executors.newSingleThreadExecutor();
   }
 
@@ -104,7 +104,7 @@ public final class PowercapCollector {
     }
 
     iteration++;
-    // summaryStart = null;
+    summaryStart = null;
   }
 
   /** Writes the {@link Summary} and {@link Samples} to the underlying directory as csvs. */
@@ -138,9 +138,8 @@ public final class PowercapCollector {
           new PrintWriter(
               new BufferedWriter(
                   new FileWriter(
-                      String.join(
-                          "/", System.getProperty("vesta.output.directory"), "energy.csv"))));
-      int componentCount = samples.get(0).energy[0].length * Powercap.SOCKET_COUNT;
+                      String.join("/", System.getProperty("vesta.output.directory"), "energy.csv"))));
+      int componentCount = samples.get(0).energy[0].length * Rapl.getInstance().getSocketCount();
       writer.println(
           String.join(
               ",",
@@ -235,13 +234,6 @@ public final class PowercapCollector {
       this.timestamp = timestamp;
       this.energy = energy;
     }
-
-    @Override
-    public String toString() {
-      return String.format(
-          "%d,%d,%s",
-          iteration, timestamp, Arrays.stream(energy).map(Arrays::toString).collect(joining(",")));
-    }
   }
 
   // helpers methods that grab/handle data
@@ -252,14 +244,18 @@ public final class PowercapCollector {
   }
 
   private static double[][] getEnergy() {
-    return Powercap.getEnergyStats();
+    return Rapl.getInstance(String.join("/", System.getProperty("vesta.library.path"), "libRapl.so"))
+        .getEnergyStats();
   }
 
   private static double computeEnergyDifference(double[][] first, double[][] second) {
     double energy = 0;
-    for (int socket = 0; socket < Powercap.SOCKET_COUNT; socket++) {
+    for (int socket = 0; socket < Rapl.getInstance().getSocketCount(); socket++) {
       for (int component = 0; component < first[socket].length; component++) {
         double diff = second[socket][component] - first[socket][component];
+        if (diff < 0) {
+          diff += Rapl.getInstance().getWrapAroundEnergy();
+        }
         energy += diff;
       }
     }
