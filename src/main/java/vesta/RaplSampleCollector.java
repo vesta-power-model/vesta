@@ -11,11 +11,11 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.stream.IntStream;
-import java.util.List;
 
 /**
  * Data collector that produces both a runtime {@code Summary} and a online collection of
@@ -111,7 +111,7 @@ public final class RaplSampleCollector {
   // TODO: do we want a different data type? what happens if we need more data like counters?
   public void dump() {
     executor.shutdown();
-    if (!samples.isEmpty()) {
+    if (samples.isEmpty()) {
       System.out.println("no energy samples collected!");
       return;
     }
@@ -138,7 +138,8 @@ public final class RaplSampleCollector {
           new PrintWriter(
               new BufferedWriter(
                   new FileWriter(
-                      String.join("/", System.getProperty("vesta.output.directory"), "energy.csv"))));
+                      String.join(
+                          "/", System.getProperty("vesta.output.directory"), "energy.csv"))));
       int componentCount = samples.get(0).energy[0].length * Rapl.getInstance().getSocketCount();
       writer.println(
           String.join(
@@ -244,7 +245,8 @@ public final class RaplSampleCollector {
   }
 
   private static double[][] getEnergy() {
-    return Rapl.getInstance(String.join("/", System.getProperty("vesta.library.path"), "libRapl.so"))
+    return Rapl.getInstance(
+            String.join("/", System.getProperty("vesta.library.path"), "libRapl.so"))
         .getEnergyStats();
   }
 
