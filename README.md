@@ -224,7 +224,7 @@ dtrace-jdk/bin/java -cp "${PWD}/target/vesta-0.1.0-jar-with-dependencies.jar" \
     vesta.MyFibonacci 50
 ```
 
-The above command will produce `summary.csv`, which contains end-to-end measurements, and `energy.csv`, which contains timestamped measurements` at `data/my-fibonacci`.
+The above command will produce `summary.csv`, which contains end-to-end measurements of energy and runtime, and `energy.csv`, which contains timestamped measurements` of energy, at `data/my-fibonacci`.
 
 Next, add the bpf probing by calling the script on your executing Java program:
 
@@ -243,18 +243,18 @@ This will produce a `probes.csv` file containing the probing information. The ab
 We recommend creating up script to execute the benchmark sanely:
 
 ```bash
-OUT_DIR=data/my-fibonacci
+OUT_DIR="${PWD}/data/my-fibonacci"
 PROBES=...
 dtrace-jdk/bin/java -cp "${PWD}/target/vesta-0.1.0-jar-with-dependencies.jar" \
     -Dvesta.output.directory="${OUT_DIR}" \
     -Dvesta.library.path="${PWD}/bin" \
     vesta.MyFibonacci 50 &
 java_pid=$! # retrieve last process pid
-python3 /mnt/c/Users/atpov/Documents/projects/vesta/scripts/java_multi_probe.py --pid "${java_pid}" \
+python3 "${PWD}/scripts/java_multi_probe.py" --pid "${java_pid}" \
     --output_directory="${OUT_DIR}" \
     --probes="${PROBES}"
 ```
 
-We provide an example script that you can copy and modify to achieve this behavior quickly.
+We provide an example script at `my_fibonacci.sh` that you can copy and modify to achieve this behavior quickly.
 
 Once your experiment completes, you can use the `metrics.py` script as described in the [experiment reproduction](#experiments-reproduction) and used the steps in the [modeling guide](#modeling) to evaluate and model your benchmark.

@@ -7,7 +7,6 @@ public class FilteringVestaRenaissancePlugin
         Plugin.AfterOperationSetUpListener,
         Plugin.BeforeOperationTearDownListener {
   private final SampleCollector collector = new SampleCollector();
-  private final SampleCollectorPapi papiCollector = new SampleCollectorPapi();
   private final int maxIters =
       Integer.parseInt(System.getProperty("vesta.renaissance.args").split(",")[0]);
   private final int batchSize =
@@ -19,20 +18,17 @@ public class FilteringVestaRenaissancePlugin
   @Override
   public void afterOperationSetUp(String benchmark, int opIndex, boolean isLastOp) {
     collector.start();
-    papiCollector.start();
   }
 
   @Override
   public void beforeOperationTearDown(String benchmark, int opIndex, long durationNanos) {
     collector.stop();
-    papiCollector.stop();
   }
 
   @Override
   public boolean canExecute(String benchmark, int opIndex) {
     if (opIndex >= maxIters) {
       collector.dumpWithStatus(true);
-      papiCollector.dumpWithStatus(true);
       return false;
     } else if (opIndex % batchSize == 0 && opIndex >= batchSize) {
       // filter by metric
@@ -48,7 +44,6 @@ public class FilteringVestaRenaissancePlugin
                 "last %d runs exceeded threshold (%f / %f = %f > %f)",
                 opIndex, runtime, baselineRuntime, runtime / baselineRuntime, threshold));
         collector.dumpWithStatus(false);
-        papiCollector.dumpWithStatus(false);
         return false;
       } else {
         System.out.println(
