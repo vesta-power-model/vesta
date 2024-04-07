@@ -49,7 +49,7 @@ dt_model.load_model(args.model)
 
 for bench in benchmarks:
     df_bench = df[df.benchmark == bench]
-    events_bench_test = df_bench.drop(["iteration","ts","benchmark","power","cpu_power","memory_power"], axis=1)
+    events_bench_test = df_bench.drop(["iteration","ts","benchmark","power"], axis=1)
     events_bench_test = events_bench_test.drop([col for col in events_bench_test.columns if 'energy_component' in col], axis=1)
     predictions = dt_model.predict(events_bench_test).tolist()
     real = df_bench.power.tolist()

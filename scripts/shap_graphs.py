@@ -31,7 +31,7 @@ args = parse_args()
 
 df_train = pd.read_csv(args.training)
 events_df_train = df_train
-events_df_train = events_df_train.drop(["iteration","ts","benchmark","power","cpu_power","memory_power"], axis=1)
+events_df_train = events_df_train.drop(["iteration","ts","benchmark","power"], axis=1)
 events_df_train = events_df_train.drop([col for col in events_df_train.columns if 'energy_component' in col], axis=1)
 power_df_train = df_train["power"]
 

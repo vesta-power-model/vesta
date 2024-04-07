@@ -6,7 +6,7 @@ PROBES=CallObjectMethod__entry,CallObjectMethod__return,CallVoidMethod__entry,Ca
 dtrace-jdk/bin/java -cp "${PWD}/target/vesta-0.1.0-jar-with-dependencies.jar" \
     -Dvesta.output.directory="${OUT_DIR}" \
     -Dvesta.library.path="${PWD}/bin" \
-    vesta.MyFibonacci 45 50 &
+    vesta.MyFibonacci 45 20 &
 pid=$!
 python3 "${PWD}/scripts/java_multi_probe.py" --pid "${pid}" \
     --output_directory="${OUT_DIR}" \
