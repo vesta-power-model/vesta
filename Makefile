@@ -13,8 +13,8 @@ JNI_INCLUDE = -I$(JAVA_INCLUDE) -I$(JAVA_LINUX_INCLUDE)
 JAVAC=javac
 JAVA_CLASSPATH = lib/dacapo.jar:lib/renaissance-gpl-0.11.0.jar
 
-JAVA_SOURCES = edu/binghamton/vpc
-JAR = vpc.jar
+JAVA_SOURCES = vesta
+JAR = vesta.jar
 
 .PHONY: %.o %.class
 %.o: %.c
