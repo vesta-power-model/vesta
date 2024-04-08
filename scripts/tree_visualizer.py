@@ -41,5 +41,5 @@ viz_rmodel = dtreeviz.model(model=model, tree_index=1,
                             y_train=power_df_train, 
                             feature_names=list(events_df_train.columns),
                             target_name="power")
-v = viz_rmodel.view(fancy=True, x=df_test.loc[args.index][features],show_just_path=False)
+v = viz_rmodel.view(fontname="monospace", fancy=True, x=df_test.loc[args.index][features],show_just_path=False)
 v.save(f"{args.output_directory}/prediction.svg")

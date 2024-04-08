@@ -381,3 +381,8 @@ python3 scripts/tree_visualizer.py \
     "${PWD}/data/vesta-artifact_test".csv \
     1000
 ```
+
+This will create a svg (the only format supported by dtreeviz). If you would like a pdf you can install rsvg-convert, move to the directory you stored the svg, and run the following:
+```bash
+rsvg-convert -f pdf -o prediction.pdf prediction.svg
+```
