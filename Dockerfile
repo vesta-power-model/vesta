@@ -1,7 +1,7 @@
 FROM debian:bullseye-slim
 
 # setup
-RUN apt-get update && apt-get install -y git wget openjdk-11-jdk make gcc maven graphviz
+RUN apt-get update && apt-get install -y --fix-missing git wget openjdk-11-jdk make gcc maven graphviz librsvg2-bin && apt-get -y upgrade
 RUN git clone https://github.com/vesta-power-model/vesta.git
 
 # setup java code

@@ -51,12 +51,13 @@ def generate_probe_tracing_program(probes):
 
 
 def shutdown_hook(output_path, cpu, data, size):
-    with open(os.path.join(output_path, 'probes.csv'), 'a') as fp_hook:
-        fp_hook.write('\n'.join([""] + PROBE_DATA) + '\n')
-        # fp.write('\n'.join([DATA_HEADER] + PROBE_DATA) + '\n')
-
     global IS_RUNNING
     IS_RUNNING = False
+
+    # with open(os.path.join(output_path, 'probes.csv'), 'a') as fp_hook:
+    #     fp_hook.write('\n'.join([""] + PROBE_DATA) + '\n')
+        # fp.write('\n'.join([DATA_HEADER] + PROBE_DATA) + '\n')
+
 
 
 def tracing_hook(bpf, cpu, data, size):
@@ -143,6 +144,10 @@ def main():
             temp = PROBE_DATA
             PROBE_DATA = []
             fp.write('\n'.join([""] + temp) + '\n')
+    if len(PROBE_DATA) > 0:
+        temp = PROBE_DATA
+        PROBE_DATA = []
+        fp.write('\n'.join([""] + temp) + '\n')
     fp.close()
 
 
