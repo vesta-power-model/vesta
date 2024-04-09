@@ -229,7 +229,7 @@ def main():
             if len(df) == 0:
                 print(f'not enough samples collected for {args.data}')
                 return
-            power = df.groupby('iteration', include_groups=False).apply(lambda s: samples_to_power(
+            power = df.groupby('iteration').apply(lambda s: samples_to_power(
                 s, norm_with_buckets(args.bucket)).reset_index('iteration', drop=True))
             # merge the power and probes along the timestamp and drop
             # all records that have no power
@@ -248,7 +248,7 @@ def main():
             ).set_index(['iteration', 'ts']).sort_index()
             # Goofy nonsense to shove the individual components into
             for component in components:
-                comp_power = df_energy.groupby('iteration', include_groups=False).apply(lambda s: samples_to_power_single_component(
+                comp_power = df_energy.groupby('iteration').apply(lambda s: samples_to_power_single_component(
                     s, component, norm_with_buckets(args.bucket)).reset_index('iteration', drop=True))
                 df = pd.merge(
                     df,
