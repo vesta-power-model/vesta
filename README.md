@@ -34,7 +34,16 @@ percentage error of 1.56\% while incurring a minimal performance and energy over
 
 # Setup
 
-In order to run the experiments (in a Docker image or otherwise), the system must be Intel + Linux and you must have `sudo` access in order to collect the data for the experiments. These following steps must be done on your system even if you are running through the Docker image.
+In order to run the experiments (in a Docker image or otherwise), the host system must be Intel + Linux server and you must have `sudo` access in order to collect the data for the experiments. These steps **must** be done on the host system even if you are running through the Docker image. The experiments presented in the paper were run on the following system:
+
+```
+Dual socket Intel Xeon E5-3630 v4 2.20GHz (40 cores)
+64GB DDR4 RAM
+Debian 11
+Linux kernel 5.17.0-3-amd64
+```
+
+Our experiments were evaluated on the [DaCapo](https://www.dacapobench.org) and [Renaissance](https://renaissance.dev) benchmark suites, which are collections of JVM applications tuned for server systems. All experiments took ~48 hours to run on the above system, which included both the baseline and the probing experiments that 256 iterations per benchmark each, the first 5 of which are discarded as warmup. To run the benchmarks effectively for this many iterations, we recommend having a CPU with at least 10 cores and at least 16GB or more of RAM. If your system's specifications are significantly less than this, or it is not a server class system, you may have some difficulty successfully running the experiments. In this case, we suggest reducing the number of iterations to 25 or 55 (this includes warmup iterations) to get sufficient data.
 
 ## RAPL
 
@@ -42,9 +51,9 @@ In order to run the experiments (in a Docker image or otherwise), the system mus
 
 ## bcc
 
-[`bpf`](https://docs.kernel.org/bpf) and [`bcc`](https://github.com/iovisor/bcc) are a set of tools that allow for method profiling of applications. To use VESTA, they must be enabled on the host machine for `UDST` instrumentation even in the Docker image. You will need to ensure that your kernel has been compiled with the Linux kernel headers. Most modern distributions of Linux have already been compiled with the headers, so you may not need to do any additional work.
+[`bpf`](https://docs.kernel.org/bpf) and [`bcc`](https://github.com/iovisor/bcc) are a set of tools that allow for method profiling of applications. To use VESTA, they must be enabled on the host machine for `UDST` instrumentation even in the Docker image. You need to ensure that your kernel has the correct Linux headers enabled. In order to do this, check the contents of your system's `/proc/config.gz` for the flags that enable `bpf` (`CONFIG_BPF`, `CONFIG_BPF_SYSCALL`, `CONFIG_BPF_JIT`, `CONFIG_HAVE_EBPF_JIT`, `CONFIG_BPF_EVENTS`, `CONFIG_IKHEADERS`). These flags should be either set to `y` (for yes, meaning they have been included), `m` (for module, meaning they are available on demand), or are not explicitly present. If any of these flags are set to `n` (for no, meaning not included), then your kernel may need to be recompiled. The majority of Linux distributions have been compiled with all of necessary flags for `VESTA` included, so hopefully this will not be necessary.
 
-Next you need to enable `bpf` by updating your configuration, which can be found at either `/proc/config.gz` or `/boot/config-<kernel-version>`. You will need to add the following flags (if they are not already present) and set all of them to `y`:
+Next, you need to modify the contents of your kernel configuration's boot file, which is found at `/boot/config` or `/boot/config-$(uname -r)` (where `$(uname -r)` will return the kernel version). This file determines which components are included in the kernel on system boot. You will need to modify the boot configuration by adding the `bpf` related flags set to `y` (or updating them to `y` if they are already present) so they will be included in the kernel. You can check the boot configuration with `cat /boot/config | grep -E "(BPF|IKHEADERS)"` or `cat /boot/config-$(uname -r) | grep -E "(BPF|IKHEADERS)"`. You should look for all of the following entries to be present and set to `y` (note that the order of the flags does not matter):
 
 ```
 CONFIG_BPF=y
@@ -55,7 +64,9 @@ CONFIG_BPF_EVENTS=y
 CONFIG_IKHEADERS=y
 ```
 
-Next, you will need to setup `bpf` and `bcc` for your distribution, which is listed in `bcc`'s [installation guide](https://github.com/iovisor/bcc/blob/master/INSTALL.md). For this process, you will need to install the kernel headers, `bpf`, and `bcc` which is frequently available through your package manager. The specific packages will differ and can be found in the installation guide, but we provide the instructions here for ease:
+If an entry is not present in the boot configuration, you should add it to `/boot/config` or `/boot/config-$(uname -r)` set to `y`.
+
+Next, you will need to setup `bpf` and `bcc` for your distribution, which is listed in `bcc`'s [installation guide](https://github.com/iovisor/bcc/blob/master/INSTALL.md). For this process, you will need to install the kernel headers package, `bpf`, and `bcc` which is frequently available through your package manager. The specific packages will differ and can be found in the installation guide, but we provide the instructions here for ease:
 
 ```
 # debian
@@ -98,6 +109,10 @@ sudo amazon-linux-extras install BCC
 sudo apk add bcc-tools bcc-doc
 ```
 
+Once you have done the two above steps, you will very likely need to reboot your system.
+
+Finally, you may need to mount [`debugfs`](https://docs.kernel.org/filesystems/debugfs.html) which `bpf` uses to communicate between the user and kernel spaces. This is done using `mount -t debugfs none /sys/kernel/debug`. If you missed this step, you may see an error message like `open(/sys/kernel/debug/tracing/uprobe_events): No such file or directory` when running the experiments.
+
 ## Java with Dtrace
 
 Finally, you will need a version of `java` with [`DTrace Probes`](https://docs.oracle.com/javase/8/docs/technotes/guides/vm/dtrace.html) enabled, which will expose the dtrace probes as `UDSTs` that can be instrumented with `bcc`. Our official repository contains a pre-built version of `openjdk-19` that was used to run our experiments. If you would like to use a different version or you are running this from the github repository, you need to re-compile from [source](https://github.com/openjdk/jdk/blob/master/doc/building.md) with the `--enable-dtrace` flag set.
@@ -110,6 +125,7 @@ We provide a Dockerfile in this repository that should correctly set up the envi
 sudo docker build . -t vesta
 sudo docker run -it --rm  --privileged \
     -v /lib/modules:/lib/modules:ro \
+    -v /sys/kernel/debug:/sys/kernel/debug:ro \
     -v /usr/src:/usr/src:ro \
     -v /etc/localtime:/etc/localtime:ro \
     vesta
@@ -117,22 +133,11 @@ sudo docker run -it --rm  --privileged \
 
 NOTE: If you are trying to reproduce the experiments from the github repo, you will need to get the benchmark jars before building the Docker image, which can be done with `bash setup_benchmarks.sh`.
 
-Once inside the image, you can use `vesta/scripts/my_fibonacci.sh` as a smoke test to confirm that you will be able to collect all the necessary data.
+Once inside the image, you need to move to the `vesta` directory to set up and run the experiments.
 
 # Running from Source
 
-You can also reproduce our experiments directly from this repository. Our experiments were run on the following system:
-
-```
-Dual socket Intel Xeon E5-3630 v4 2.20GHz
-64GB DDR4 RAM
-Debian 11
-Linux kernel 5.17.0-3-amd64
-```
-
-## Setup
-
-First you should install the following package on your system to support the experiments and modeling:
+You can also reproduce our experiments directly from this repository. First you should install the following package on your system to support the experiments and modeling:
 
 ```
 apt-get install -y git wget openjdk-11-jdk make \
@@ -140,7 +145,7 @@ apt-get install -y git wget openjdk-11-jdk make \
     python3 python3-pip graphviz
 pip3 install numpy pandas pytest numba xgboost scikit-learn shap
 ```
-If you are not on Debian. your system's package manager likely has similar targets.
+If you are not on Debian, your system's package manager likely has similar targets. Then you can download the repository, unpack it, and go into the repository's directory. Once in the directory, you can do the following steps to build the codebase:
 
 1. run `bash setup_benchmarks.sh` to get the dependency benchmarks.
 
@@ -150,7 +155,34 @@ If you are not on Debian. your system's package manager likely has similar targe
 
 # Experiment Reproduction
 
-An experiment is defined using a `json` file. The file should contain a list of dicts that define the parameters for the experiments:
+Once you've setup the codebase and are in the `vesta` root directory, you can use `bash scripts/my_fibonacci.sh` as a smoke test to confirm that you will be able to collect all the necessary data. This will run a very simple fibonacci workload with all profiling enabled, and process the energy and probing data into a single aligned timeline. After the program runs, you should see a dataframe printed to the console of the aligned data. In addition, a directory should be produced at `${PWD}/my-fibonacci` with the following files: `aligned.csv`, `energy.csv`, `probes.csv`, and `summary.csv`. Here is a snip of the expected output from `scripts/my_fibonacci.sh`:
+
+```bash
+/vesta# bash scripts/my_fibonacci.sh
+bash scripts/my_fibonacci.sh
+computed fib(45) in 7652 millis
+ran fib(45) in 7671 +/- 56.4912 millis
+aligning data for my-fibonacci
+                       power  CallObjectMethod__entry  CallObjectMethod__return  SetByteArrayRegion__entry  SetByteArrayRegion__return
+iteration ts                                                                                                                                                
+6         1495958  24.859596                   1518.0                    1518.0                     1518.0                      1518.0
+          1495959  25.174031                   1539.0                    1538.0                     1538.0                      1538.0
+          1495960  25.597081                   1517.0                    1518.0                     1518.0                      1518.0
+          1495961  25.490402                   1530.0                    1530.0                     1530.0                      1530.0
+          1495962  25.577676                   1528.0                    1528.0                     1528.0                      1528.0
+...                      ...                      ...                       ...                        ...                       ...
+19        1496059  25.385899                   1546.0                    1546.0                     1546.0                      1546.0
+          1496060  25.070887                   1560.0                    1560.0                     1560.0                      1560.0
+          1496061  25.323372                   1534.0                    1534.0                     1534.0                      1534.0
+          1496062  25.730467                   1538.0                    1538.0                     1538.0                      1538.0
+          1496063  27.594447                   1546.0                    1546.0                     1546.0                      1546.0
+```
+
+Once the test completes successfully, you are ready to run the experiments.
+
+## Experiment Definition
+
+Our experiments are defined using a `json` file. The file should contain a list of dicts that define the parameters for the experiments:
 
 ```json
 {
@@ -161,7 +193,7 @@ An experiment is defined using a `json` file. The file should contain a list of 
 },
 ```
 
-We provide some `json` files that contain the experiments used to produce our data. You can generate new experiment scripts by running `scripts/generate_experiments.py` with a `benchmarks.json`. This will create a directory containing the experiment driving code. The probes listed in `benchmark-confgs/benchmarks.json` were selected during `VESTA`'s screening. You may add or remove probes from this list by consulting the full list of Java's [DTrace Probes](https://docs.oracle.com/javase/8/docs/technotes/guides/vm/dtrace.html); make sure that any instance of a hyphen (`-`) is replaced by two underscores (`__`) if you do add probes. There are two additional caveats regarding modifying the sampled probes:
+We provide some `json` files that contain the experiments used to produce our data. You can generate new experiment scripts by running `scripts/generate_experiments.py` with a `benchmarks.json`. This will create a directory containing the experiment driving code. The probes listed in `benchmark-configs/benchmarks.json` were selected during `VESTA`'s screening. You may add or remove probes from this list by consulting the full list of Java's [DTrace Probes](https://docs.oracle.com/javase/8/docs/technotes/guides/vm/dtrace.html); make sure that any instance of a hyphen (`-`) is replaced by two underscores (`__`) if you do add probes. There are two additional caveats regarding modifying the sampled probes:
 
 1. As mentioned in the publication, unselected probes incurred significant overhead 
 2. Language runtime events (LREs) are represented through a pair of probes with the same prefix but ending with `__entry`/`__return` and `__begin`/`__end`. If a given probe does not have its corresponding partner probe, then it will be modeled individually as a counter.
@@ -220,34 +252,35 @@ final class MyFibonacci {
 Next, recompile the tool with `mvn package`; if you have third-party dependencies, you should add them to the `pom.xml`. You should be able to directly run your benchmark from the newly built jar:
 
 ```bash
-OUT_DIR="${data}/my-fibonacci"
+OUT_DIR="${PWD}/my-fibonacci"
 dtrace-jdk/bin/java -cp "${PWD}/target/vesta-0.1.0-jar-with-dependencies.jar" \
     -Dvesta.output.directory="${OUT_DIR}" \
     -Dvesta.library.path="${PWD}/bin" \
     vesta.MyFibonacci 50
 ```
 
-The above command will produce `summary.csv`, which contains end-to-end measurements of energy and runtime, and `energy.csv`, which contains timestamped measurements` of energy, at `"${data}/my-fibonacci"`.
+The above command will produce `${PWD}/my-fibonacci/summary.csv`, which contains end-to-end measurements of energy and runtime, and `${PWD}/my-fibonacci/energy.csv`, which contains timestamped measurements` of energy.
 
 ### BPF Probing
 
 Next, you can do bpf probing by calling the `scripts/java_multi_probe.py` script on your executing Java program:
 
 ```bash
+OUT_DIR="${PWD}/my-fibonacci"
 PROBES=NewStringUTF__entry,NewStringUTF__return,SetByteArrayRegion__entry,SetByteArrayRegion__return,thread__park__begin,thread__park__end
 python3 /mnt/c/Users/atpov/Documents/projects/vesta/scripts/java_multi_probe.py --pid "${pid}" \
     --output_directory="${OUT_DIR}" \
     --probes="${PROBES}"
 ```
 
-This will produce a `probes.csv` file containing the probing information.
+This will produce a `${PWD}/my-fibonacci/probes.csv` file containing the probing information.
 
-### Collecting data for `VESTA`
+### Including the custom benchmark in an experiment
 
-You can manually execute the benchmark as a sanity test with a small script:
+Before adding your custom benchmark to an experiment, you may want to execute the benchmark as a sanity test with a small script:
 
 ```bash
-OUT_DIR="${PWD}/"${data}/my-fibonacci""
+OUT_DIR="${PWD}/my-fibonacci"
 PROBES=NewStringUTF__entry,NewStringUTF__return,SetByteArrayRegion__entry,SetByteArrayRegion__return,thread__park__begin,thread__park__end
 dtrace-jdk/bin/java -cp "${PWD}/target/vesta-0.1.0-jar-with-dependencies.jar" \
     -Dvesta.output.directory="${OUT_DIR}" \
@@ -259,9 +292,7 @@ python3 "${PWD}/scripts/java_multi_probe.py" --pid "${pid}" \
     --probes="${PROBES}"
 ```
 
-We provide an example script at `scripts/my_fibonacci.sh` that you can copy and modify to achieve this behavior quickly.
-
-You can then add your benchmark to a `benchmarks.json` file as a `"custom"` suite:
+The smoke testing script at `scripts/my_fibonacci.sh` can be used a template: you can copy and modify it to produce a new smoke test. If the three data files (`energy.csv`, `probes.csv`, `summary.csv`) are present and you can successfully run `scripts/single-alignment.py` on the new directory, then your benchmark has been integrated with `VESTA`'s driver. You can then add your benchmark to a `benchmarks.json` file as a `"custom"` suite:
 
 ```json
 {
@@ -376,13 +407,13 @@ Assuming you would like to view the prediction path from the 1000th datapoint in
 ```bash
 python3 scripts/tree_visualizer.py \
     --output_directory="${PWD}/data" \
-    "${PWD}/data/vesta-artifact".json \
-    "${PWD}/data/vesta-artifact_train".csv \
-    "${PWD}/data/vesta-artifact_test".csv \
+    "${PWD}/data/vesta-artifact.json" \
+    "${PWD}/data/vesta-artifact_train.csv" \
+    "${PWD}/data/vesta-artifact_test.csv" \
     1000
 ```
 
-This will create a svg (the only format supported by dtreeviz). If you would like a pdf you can install rsvg-convert, move to the directory you stored the svg, and run the following:
+This will create a svg (the only format supported by dtreeviz). If you would like a pdf you can use `rsvg-convert` to convert the output:
 ```bash
-rsvg-convert -f pdf -o prediction.pdf prediction.svg
+rsvg-convert -f pdf -o "${PWD}/data/prediction.pdf" "${PWD}/data/prediction.svg"
 ```
