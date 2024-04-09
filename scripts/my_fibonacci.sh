@@ -11,3 +11,9 @@ pid=$!
 python3 "${PWD}/scripts/java_multi_probe.py" --pid "${pid}" \
     --output_directory="${OUT_DIR}" \
     --probes="${PROBES}"
+
+python3 "${PWD}/scripts/single-alignment.py" \
+    --out_file_name="${OUT_DIR}/aligned.csv" \
+    --bucket=1000 \
+    --warm_up=5 \
+    "${OUT_DIR}"
