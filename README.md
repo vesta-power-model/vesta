@@ -125,7 +125,7 @@ We provide a Dockerfile in this repository that should correctly set up the envi
 sudo docker build . -t vesta
 sudo docker run -it --rm  --privileged \
     -v /lib/modules:/lib/modules:ro \
-    -v /sys/kernel/debug:/sys/kernel/debug:ro \
+    -v /sys/kernel/debug:/sys/kernel/debug:rw \
     -v /usr/src:/usr/src:ro \
     -v /etc/localtime:/etc/localtime:ro \
     vesta
@@ -266,9 +266,10 @@ The above command will produce `${PWD}/my-fibonacci/summary.csv`, which contains
 Next, you can do bpf probing by calling the `scripts/java_multi_probe.py` script on your executing Java program:
 
 ```bash
+pid=$!
 OUT_DIR="${PWD}/my-fibonacci"
 PROBES=NewStringUTF__entry,NewStringUTF__return,SetByteArrayRegion__entry,SetByteArrayRegion__return,thread__park__begin,thread__park__end
-python3 /mnt/c/Users/atpov/Documents/projects/vesta/scripts/java_multi_probe.py --pid "${pid}" \
+python3 "${PWD}/scripts/java_multi_probe.py" --pid "${pid}" \
     --output_directory="${OUT_DIR}" \
     --probes="${PROBES}"
 ```
